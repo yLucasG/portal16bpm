@@ -11,33 +11,17 @@ const ESSENTIAL_LINKS = [
   {
     label: 'Portal PMPE',
     url: 'https://portalpmpe.sistemas.pm.pe.gov.br/login',
-    iconBg: '#1e3a8a',
-    svg: `<svg class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0
-        0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0
-        012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>`,
+    img: 'portalpmpe.png',
   },
   {
     label: 'Autovision SDS',
     url: 'https://www.autovision.com.br/sds/index.php',
-    iconBg: '#15803d',
-    svg: `<svg class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-        d="M15 10l4.553-2.069A1 1 0 0121 8.868V15.13a1 1 0 01-1.447.894L15 14
-        M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
-    </svg>`,
+    img: 'autovision.png',
   },
   {
     label: 'Power BI SDS',
     url: 'https://powerbi.pe.gov.br/relatorios/browse/SDS/GGACE',
-    iconBg: '#d97706',
-    svg: `<svg class="w-5 h-5" fill="white" viewBox="0 0 24 24">
-      <rect x="2" y="13" width="4" height="9" rx="1"/>
-      <rect x="9" y="8" width="4" height="14" rx="1"/>
-      <rect x="16" y="3" width="4" height="19" rx="1"/>
-    </svg>`,
+    img: 'powerbi.png',
   },
 ];
 
@@ -136,10 +120,8 @@ const ESSENTIAL_LINKS = [
                 rel="noopener noreferrer"
                 class="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 active:bg-indigo-50 active:scale-95 transition-all"
               >
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                     [style.background]="link.iconBg"
-                     [innerHTML]="link.svg">
-                </div>
+                <img [src]="link.img" [alt]="link.label"
+                     class="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                 <span class="text-[10px] font-semibold text-gray-600 text-center leading-tight">
                   {{ link.label }}
                 </span>
