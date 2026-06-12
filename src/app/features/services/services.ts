@@ -50,6 +50,33 @@ import { SERVICES, ServiceDef } from './services.data';
         Ferramentas
       </p>
 
+      <div class="space-y-3">
+
+      <!-- Card: Checklists Operacionais -->
+      <a
+        routerLink="/checklists"
+        class="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 active:scale-[0.98] transition-transform"
+      >
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 text-sm leading-snug">Checklists Operacionais</p>
+          <p class="text-xs text-gray-400 mt-0.5">Passos do serviço com persistência</p>
+          <div class="flex items-center gap-1 mt-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+            <span class="text-xs text-indigo-500 font-medium">Salvo automaticamente</span>
+          </div>
+        </div>
+        <svg class="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+
+      <!-- Card: Relatórios de Serviço -->
       <a
         routerLink="/reports"
         class="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 active:scale-[0.98] transition-transform"
@@ -72,6 +99,8 @@ import { SERVICES, ServiceDef } from './services.data';
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
       </a>
+
+      </div><!-- /space-y-3 ferramentas -->
 
       <p class="text-center text-xs text-gray-300 mt-8">
         O progresso do checklist é salvo automaticamente por dia.

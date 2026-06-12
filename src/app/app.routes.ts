@@ -24,6 +24,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'checklists',
+    loadComponent: () =>
+      import('./features/services/service-checklist/service-checklist').then(m => m.ServiceChecklist),
+    canActivate: [authGuard],
+  },
+  {
     path: 'reports',
     loadComponent: () =>
       import('./features/reports/whatsapp-report/whatsapp-report').then(m => m.WhatsappReport),
