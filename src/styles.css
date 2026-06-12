@@ -8,7 +8,9 @@ body {
   @apply bg-gray-50 text-gray-900;
 }
 
-.overflow-hidden {
+/* Classe dedicada para travar scroll do body quando modais estão abertos.
+   NÃO usar .overflow-hidden pois conflita com a utility class do Tailwind. */
+.body-modal-open {
   overflow: hidden !important;
   height: 100vh;
 }

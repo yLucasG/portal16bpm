@@ -511,7 +511,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
          MODAL — Operação (tag clicada no header)
     ══════════════════════════════════════════ -->
     @if (modalOperacao(); as op) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center px-4"
+      <div class="fixed inset-0 z-[60] flex items-center justify-center px-4"
            style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
            (click)="modalOperacao.set(null)">
         <div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
@@ -567,7 +567,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
          MODAL — Viaturas
     ══════════════════════════════════════════ -->
     @if (showViaturaModal()) {
-      <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      <div class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
            style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
            (click)="showViaturaModal.set(false)">
         <div class="bg-white w-full sm:max-w-sm sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[80vh] flex flex-col"
@@ -583,19 +583,19 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
             </div>
             <div>
               <p class="text-white font-bold text-base leading-none">Viaturas em Serviço</p>
-              <p class="text-orange-100 text-xs mt-0.5">{{ viaturas().length }} viatura(s) lançada(s)</p>
+              <p class="text-orange-100 text-xs mt-0.5">{{ sheetsService.viaturas().length }} viatura(s) lançada(s)</p>
             </div>
           </div>
 
           <!-- Lista -->
           <div class="overflow-y-auto flex-1">
-            @if (viaturas().length === 0) {
+            @if (sheetsService.viaturas().length === 0) {
               <div class="p-6 text-center text-slate-400 text-sm">
                 Nenhum dado de viatura na planilha.
               </div>
             } @else {
               <div class="divide-y divide-slate-100">
-                @for (v of viaturas(); track v['nome']) {
+                @for (v of sheetsService.viaturas(); track v['nome']) {
                   <div class="flex items-center gap-3 px-5 py-3.5">
                     <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -637,7 +637,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
          MODAL — Efetivo
     ══════════════════════════════════════════ -->
     @if (showEfetivoModal()) {
-      <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      <div class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
            style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
            (click)="showEfetivoModal.set(false)">
         <div class="bg-white w-full sm:max-w-sm sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[80vh] flex flex-col"
@@ -654,20 +654,20 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
             <div>
               <p class="text-white font-bold text-base leading-none">Efetivo em Serviço</p>
               <p class="text-blue-200 text-xs mt-0.5">
-                {{ sheetsService.efetivoTotal() > 0 ? sheetsService.efetivoTotal() + ' PM no total' : sheetsService.dados().length + ' linha(s)' }}
+                {{ sheetsService.efetivoTotal() > 0 ? sheetsService.efetivoTotal() + ' PM no total' : sheetsService.efetivo().length + ' linha(s)' }}
               </p>
             </div>
           </div>
 
           <!-- Lista -->
           <div class="overflow-y-auto flex-1">
-            @if (sheetsService.dados().length === 0) {
+            @if (sheetsService.efetivo().length === 0) {
               <div class="p-6 text-center text-slate-400 text-sm">
-                Nenhum dado na planilha.
+                Nenhum dado de efetivo na planilha.
               </div>
             } @else {
               <div class="divide-y divide-slate-100">
-                @for (e of sheetsService.dados(); track $index) {
+                @for (e of sheetsService.efetivo(); track $index) {
                   <div class="flex items-center gap-3 px-5 py-3.5">
                     <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -680,7 +680,6 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                       <p class="text-xs text-slate-400 mt-0.5 truncate">{{ e['local'] || '—' }}</p>
                     </div>
                     <div class="flex flex-col items-end gap-1">
-                      <span class="text-[9px] font-bold text-blue-600 uppercase tracking-wider bg-blue-100 px-2 py-0.5 rounded-md">{{ e['tipo'] || '—' }}</span>
                       <span class="text-xs font-semibold text-slate-600">{{ e['quantidade'] || '0' }} PM(s)</span>
                     </div>
                   </div>
@@ -723,8 +722,6 @@ export class DashboardMural implements OnInit, OnDestroy {
   // ── Google Sheets ────────────────────────────────────────────────
   readonly sheetsErro = signal<string>('');
 
-  readonly viaturas = computed(() => this.sheetsService.dados().filter(r => r.tipo === 'Viatura'));
-
   // ── Modais ────────────────────────────────────────────────────────
   readonly modalOperacao    = signal<SheetRow | null>(null);
   readonly showViaturaModal = signal(false);
@@ -760,9 +757,9 @@ export class DashboardMural implements OnInit, OnDestroy {
     effect(() => {
       const isAnyModalOpen = this.showViaturaModal() || this.showEfetivoModal() || !!this.modalOperacao();
       if (isAnyModalOpen) {
-        document.body.classList.add('overflow-hidden');
+        document.body.classList.add('body-modal-open');
       } else {
-        document.body.classList.remove('overflow-hidden');
+        document.body.classList.remove('body-modal-open');
       }
     });
   }
@@ -789,7 +786,7 @@ export class DashboardMural implements OnInit, OnDestroy {
   async carregarSheets(): Promise<void> {
     try {
       this.sheetsErro.set('');
-      await this.sheetsService.buscarDados();
+      await this.sheetsService.buscarTodos();
     } catch (err) {
       this.sheetsErro.set('Não foi possível conectar com a planilha. Verifique sua conexão ou contate o administrador.');
     }
