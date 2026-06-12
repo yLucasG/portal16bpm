@@ -27,6 +27,7 @@ export class AuthService {
   }
 
   async signOut() {
+    this._session.set(null);
     await this.supabase.client.auth.signOut();
     this.router.navigate(['/login']);
   }
