@@ -1,74 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { Noticia, NoticiasService } from '../../core/services/noticias.service';
 
-interface NewsItem {
-  id: number;
-  title: string;
-  date: string;
-  category: string;
-  categoryCls: string;
-  borderCls: string;
-  summary: string;
-  urgent: boolean;
-}
-
-// Tailwind classes usadas nas classes dinâmicas abaixo (garante detecção no scan)
-// border-l-blue-500 border-l-indigo-500 border-l-amber-500 border-l-slate-400
-// bg-blue-50 border-blue-200 text-blue-700
-// bg-indigo-50 border-indigo-200 text-indigo-700
-// bg-amber-50 border-amber-200 text-amber-700
-// bg-slate-100 border-slate-200 text-slate-600
-
-const NEWS: NewsItem[] = [
-  {
-    id: 1,
-    title: 'Foco na Operação Patrulha do Bairro',
-    date: 'Hoje',
-    category: 'Operacional',
-    borderCls: 'border-l-blue-500',
-    categoryCls: 'bg-blue-50 border border-blue-200 text-blue-700',
-    summary:
-      'Atenção redobrada na saturação do centro comercial e monitoramento das praças. Efetivo deve manter postura ativa e visível durante todo o turno.',
-    urgent: true,
-  },
-  {
-    id: 2,
-    title: 'Reunião de Planejamento Operacional — Semana 25',
-    date: 'Ontem',
-    category: 'Planejamento',
-    borderCls: 'border-l-indigo-500',
-    categoryCls: 'bg-indigo-50 border border-indigo-200 text-indigo-700',
-    summary:
-      'O planejamento das ações da próxima semana ocorrerá conforme diretriz da DPO. Todos os Ofcs. de Operações devem participar e apresentar relatório de turno.',
-    urgent: false,
-  },
-  {
-    id: 3,
-    title: 'Alerta: Elevação de CVP na Área do Bairro do Recife',
-    date: '10 Jun',
-    category: 'Inteligência',
-    borderCls: 'border-l-amber-500',
-    categoryCls: 'bg-amber-50 border border-amber-200 text-amber-700',
-    summary:
-      'Indicadores apontam aumento de roubos a ônibus e ao comércio. Acionar ROCAM nas ocorrências e saturar pontos críticos identificados no mapa de calor.',
-    urgent: true,
-  },
-  {
-    id: 4,
-    title: 'Escala de Serviço — Mês de Junho Publicada',
-    date: '08 Jun',
-    category: 'Administração',
-    borderCls: 'border-l-slate-400',
-    categoryCls: 'bg-slate-100 border border-slate-200 text-slate-600',
-    summary:
-      'A escala mensal de junho foi publicada. Verificar no Livro de Partes as alterações e inclusões aprovadas pela Administração do Batalhão.',
-    urgent: false,
-  },
+// Avatar colors — full strings aqui garantem detecção pelo scanner do Tailwind v4:
+// bg-blue-500 bg-indigo-500 bg-violet-500 bg-teal-500 bg-emerald-500 bg-amber-500
+const AVATAR_COLORS = [
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-violet-500',
+  'bg-teal-500',
+  'bg-emerald-500',
+  'bg-amber-500',
 ];
+
+const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
 
 @Component({
   selector: 'app-dashboard-mural',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   template: `
     <div class="min-h-screen bg-gray-50 pb-24">
 
@@ -77,10 +28,8 @@ const NEWS: NewsItem[] = [
       ════════════════════════════════════════════════════════ -->
       <div class="bg-gradient-to-br from-slate-900 to-blue-950 px-4 pt-6 pb-10 rounded-b-3xl">
 
-        <!-- Barra superior: badge + data -->
         <div class="flex items-center justify-between mb-7">
           <div class="flex items-center gap-3">
-            <!-- Badge 16º BPM -->
             <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/50">
               <span class="text-white text-sm font-black tracking-tight">16</span>
             </div>
@@ -89,25 +38,19 @@ const NEWS: NewsItem[] = [
               <p class="text-white text-xs font-semibold leading-tight mt-0.5">Batalhão Frei Caneca</p>
             </div>
           </div>
-
-          <!-- Data atual -->
-          <div class="text-right">
-            <p class="text-slate-300 text-[11px] font-medium">{{ today }}</p>
-          </div>
+          <p class="text-slate-300 text-[11px] font-medium">{{ today }}</p>
         </div>
 
-        <!-- Saudação dinâmica -->
         <div class="mb-3">
           <p class="text-slate-400 text-sm font-medium leading-none">{{ greeting }},</p>
-          <h1 class="text-white text-[28px] font-black tracking-tight leading-tight mt-1">Oficial</h1>
+          <h1 class="text-white text-[28px] font-black tracking-tight leading-tight mt-1">
+            {{ userNome() }}
+          </h1>
         </div>
-
-        <!-- Cadeia hierárquica -->
         <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
           SDS · PMPE · DPO · DIM · 16º BPM
         </p>
 
-        <!-- Status pills -->
         <div class="flex items-center gap-2 mt-4 flex-wrap">
           <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
             <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
@@ -128,16 +71,14 @@ const NEWS: NewsItem[] = [
       ════════════════════════════════════════════════════════ -->
       <div class="px-4 pt-5 space-y-6">
 
-        <!-- ── INDICADORES RÁPIDOS ────────────────────────────── -->
+        <!-- ── INDICADORES RÁPIDOS ─────────────────────────── -->
         <div>
           <div class="flex items-baseline justify-between mb-3">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Indicadores</p>
             <span class="text-[10px] text-slate-300 font-medium">2º Trimestre · 2026</span>
           </div>
-
           <div class="grid grid-cols-2 gap-3">
 
-            <!-- META MVI -->
             <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 p-4">
               <div class="flex items-start justify-between mb-3">
                 <div>
@@ -151,12 +92,11 @@ const NEWS: NewsItem[] = [
               </div>
               <p class="text-[22px] font-black text-emerald-500 leading-none mb-2.5">↓ 68%</p>
               <div class="flex items-center gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                 <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Atingida</span>
               </div>
             </div>
 
-            <!-- META CVP -->
             <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 p-4">
               <div class="flex items-start justify-between mb-3">
                 <div>
@@ -170,12 +110,11 @@ const NEWS: NewsItem[] = [
               </div>
               <p class="text-[22px] font-black text-emerald-500 leading-none mb-2.5">↓ 68%</p>
               <div class="flex items-center gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                 <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Atingida</span>
               </div>
             </div>
 
-            <!-- VIATURAS ATIVAS -->
             <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-amber-400 p-4">
               <div class="flex items-start justify-between mb-3">
                 <div>
@@ -189,12 +128,11 @@ const NEWS: NewsItem[] = [
               </div>
               <p class="text-[22px] font-black text-amber-500 leading-none mb-2.5">12/15</p>
               <div class="flex items-center gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
                 <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">80% disp.</span>
               </div>
             </div>
 
-            <!-- EFETIVO EM SERVIÇO -->
             <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-blue-400 p-4">
               <div class="flex items-start justify-between mb-3">
                 <div>
@@ -208,7 +146,7 @@ const NEWS: NewsItem[] = [
               </div>
               <p class="text-[22px] font-black text-blue-500 leading-none mb-2.5">24 PM</p>
               <div class="flex items-center gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                 <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Escala OK</span>
               </div>
             </div>
@@ -216,46 +154,171 @@ const NEWS: NewsItem[] = [
           </div>
         </div>
 
-        <!-- ── FEED DE NOTÍCIAS ───────────────────────────────── -->
+        <!-- ── FEED DE NOTÍCIAS / PUBLICAR ────────────────────── -->
         <div>
           <div class="flex items-baseline justify-between mb-3">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Diretrizes do Comando</p>
-            <span class="text-[10px] text-slate-300 font-medium">{{ newsItems.length }} publicações</span>
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Mural de Alertas</p>
+            <span class="text-[10px] text-slate-300 font-medium">{{ feed().length }} publicação(ões)</span>
           </div>
 
-          <div class="space-y-3">
-            @for (item of newsItems; track item.id) {
+          <!-- Formulário de publicação -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-4">
 
-              <div class="bg-white rounded-2xl border border-slate-200 border-l-4 p-4"
-                   [class]="item.borderCls">
-
-                <!-- Badges + data -->
-                <div class="flex items-center gap-2 mb-2 flex-wrap">
-                  @if (item.urgent) {
-                    <span class="px-2 py-0.5 rounded-md bg-red-50 border border-red-200 text-red-600 text-[9px] font-bold uppercase tracking-wider">
-                      ● Urgente
-                    </span>
-                  }
-                  <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider"
-                        [class]="item.categoryCls">
-                    {{ item.category }}
-                  </span>
-                  <span class="ml-auto text-[10px] text-slate-400 font-medium flex-shrink-0">{{ item.date }}</span>
-                </div>
-
-                <!-- Título -->
-                <p class="text-sm font-bold text-slate-800 leading-snug mb-1.5">{{ item.title }}</p>
-
-                <!-- Resumo -->
-                <p class="text-xs text-slate-500 leading-relaxed">{{ item.summary }}</p>
-
+            <!-- Cabeçalho do form -->
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
+                   [class]="avatarColor(userId())">
+                {{ userNome()[0]?.toUpperCase() }}
               </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-800 leading-none">{{ userNome() }}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Publicar para o 16º BPM</p>
+              </div>
+            </div>
 
+            <!-- Campos -->
+            <div class="space-y-2">
+              <input
+                type="text"
+                [(ngModel)]="titulo"
+                name="titulo"
+                placeholder="Título do alerta ou lembrete..."
+                maxlength="120"
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent placeholder:text-slate-400"
+              />
+              <textarea
+                [(ngModel)]="conteudo"
+                name="conteudo"
+                rows="3"
+                placeholder="Descreva o aviso, lembrete ou diretriz em detalhes..."
+                class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent placeholder:text-slate-400 resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Erro de publicação -->
+            @if (erroForm()) {
+              <p class="text-xs text-red-500 mt-2">{{ erroForm() }}</p>
             }
+
+            <!-- Botão publicar -->
+            <div class="flex justify-end mt-3">
+              <button
+                (click)="publicarNoticia()"
+                [disabled]="publicando() || !titulo.trim() || !conteudo.trim()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 active:scale-95 disabled:opacity-40 transition-all"
+              >
+                @if (publicando()) {
+                  <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                } @else {
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                  </svg>
+                }
+                {{ publicando() ? 'Publicando...' : 'Publicar Alerta' }}
+              </button>
+            </div>
           </div>
+
+          <!-- Estado: carregando -->
+          @if (feedLoading()) {
+            <div class="space-y-3">
+              @for (_ of [1, 2]; track $index) {
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 animate-pulse">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-slate-200"></div>
+                    <div class="space-y-1.5 flex-1">
+                      <div class="h-3 bg-slate-200 rounded w-1/3"></div>
+                      <div class="h-2 bg-slate-100 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                  <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+                  <div class="h-3 bg-slate-100 rounded w-full mb-1"></div>
+                  <div class="h-3 bg-slate-100 rounded w-4/5"></div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Estado: erro -->
+          @if (!feedLoading() && feedErro()) {
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+              <svg class="w-8 h-8 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+              </svg>
+              <p class="text-sm font-semibold text-red-700 mb-1">Erro ao carregar publicações</p>
+              <p class="text-xs text-red-500 mb-3">{{ feedErro() }}</p>
+              <button (click)="carregarNoticias()"
+                      class="text-xs font-bold text-red-600 underline">Tentar novamente</button>
+            </div>
+          }
+
+          <!-- Estado: sem publicações -->
+          @if (!feedLoading() && !feedErro() && feed().length === 0) {
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center">
+              <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+              </svg>
+              <p class="text-sm font-semibold text-slate-500">Nenhuma publicação ainda</p>
+              <p class="text-xs text-slate-400 mt-1">Seja o primeiro a publicar um alerta para o batalhão.</p>
+            </div>
+          }
+
+          <!-- Lista de notícias -->
+          @if (!feedLoading() && !feedErro() && feed().length > 0) {
+            <div class="space-y-3">
+              @for (item of feed(); track item.id) {
+                <div class="bg-white rounded-2xl border border-slate-200 p-4">
+
+                  <!-- Header do card -->
+                  <div class="flex items-start justify-between mb-3">
+
+                    <!-- Avatar + autor + data -->
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
+                           [class]="avatarColor(item.autor_id)">
+                        {{ item.autor_nome[0]?.toUpperCase() }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-800 leading-none truncate">{{ item.autor_nome }}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">{{ formatarData(item.created_at) }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Botão excluir (RBAC: autor ou master admin) -->
+                    @if (podeExcluir(item)) {
+                      <button
+                        (click)="excluirNoticia(item.id)"
+                        class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-500 active:scale-90 transition-all flex-shrink-0 ml-2"
+                        title="Excluir publicação"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    }
+                  </div>
+
+                  <!-- Título -->
+                  <p class="text-sm font-bold text-slate-800 leading-snug mb-1.5">{{ item.titulo }}</p>
+
+                  <!-- Conteúdo -->
+                  <p class="text-xs text-slate-500 leading-relaxed">{{ item.conteudo }}</p>
+
+                </div>
+              }
+            </div>
+          }
         </div>
 
-        <!-- ── MÓDULOS DO BATALHÃO ──────────────────────── -->
+        <!-- ── MÓDULOS DO BATALHÃO ─────────────────────────── -->
         <div>
           <div class="flex items-baseline justify-between mb-3">
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Módulos do Batalhão</p>
@@ -264,7 +327,6 @@ const NEWS: NewsItem[] = [
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-            <!-- Material Bélico -->
             <a routerLink="/modules/material-belico"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
@@ -276,7 +338,6 @@ const NEWS: NewsItem[] = [
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Material Bélico</p>
             </a>
 
-            <!-- Almoxarifado -->
             <a routerLink="/modules/almoxarifado"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
@@ -288,7 +349,6 @@ const NEWS: NewsItem[] = [
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Almoxarifado</p>
             </a>
 
-            <!-- 1ª Cia -->
             <a routerLink="/modules/1a-cia"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
@@ -300,7 +360,6 @@ const NEWS: NewsItem[] = [
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">1ª Cia</p>
             </a>
 
-            <!-- 2ª Cia -->
             <a routerLink="/modules/2a-cia"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
@@ -312,7 +371,6 @@ const NEWS: NewsItem[] = [
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">2ª Cia</p>
             </a>
 
-            <!-- 3ª Cia -->
             <a routerLink="/modules/3a-cia"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center">
@@ -324,7 +382,6 @@ const NEWS: NewsItem[] = [
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">3ª Cia</p>
             </a>
 
-            <!-- SSTran -->
             <a routerLink="/modules/sstran"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
@@ -336,7 +393,6 @@ const NEWS: NewsItem[] = [
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">SSTran</p>
             </a>
 
-            <!-- Inteligência -->
             <a routerLink="/modules/inteligencia"
                class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
               <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
@@ -352,7 +408,7 @@ const NEWS: NewsItem[] = [
           </div>
         </div>
 
-        <!-- Rodapé institucional -->
+        <!-- Rodapé -->
         <div class="flex items-center gap-3 py-2">
           <div class="flex-1 h-px bg-slate-200"></div>
           <p class="text-[10px] text-slate-300 font-semibold uppercase tracking-widest text-center">
@@ -365,9 +421,28 @@ const NEWS: NewsItem[] = [
     </div>
   `,
 })
-export class DashboardMural {
-  readonly newsItems: NewsItem[] = NEWS;
+export class DashboardMural implements OnInit {
+  private readonly auth           = inject(AuthService);
+  private readonly noticiasService = inject(NoticiasService);
 
+  // ── Auth state ─────────────────────────────────────────────────
+  private readonly user     = computed(() => this.auth.session()?.user ?? null);
+  readonly userId           = computed(() => this.user()?.id ?? '');
+  readonly userNome         = computed(() => this.user()?.user_metadata?.['nome'] ?? 'Oficial');
+  private readonly isMaster = computed(() => this.user()?.email === MASTER_ADMIN_EMAIL);
+
+  // ── Feed ────────────────────────────────────────────────────────
+  readonly feed        = signal<Noticia[]>([]);
+  readonly feedLoading = signal(true);
+  readonly feedErro    = signal('');
+
+  // ── Formulário ──────────────────────────────────────────────────
+  titulo   = '';
+  conteudo = '';
+  readonly publicando = signal(false);
+  readonly erroForm   = signal('');
+
+  // ── Saudação e data ─────────────────────────────────────────────
   readonly greeting = (() => {
     const h = new Date().getHours();
     if (h >= 5 && h < 12) return 'Bom dia';
@@ -376,8 +451,93 @@ export class DashboardMural {
   })();
 
   readonly today = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
+    weekday: 'long', day: 'numeric', month: 'long',
   }).replace(/^./, c => c.toUpperCase());
+
+  // ── Lifecycle ────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.carregarNoticias();
+  }
+
+  // ── Métodos ──────────────────────────────────────────────────────
+
+  async carregarNoticias(): Promise<void> {
+    this.feedLoading.set(true);
+    this.feedErro.set('');
+
+    const { data, error } = await this.noticiasService.buscarNoticias();
+
+    if (error) {
+      this.feedErro.set(error.message ?? 'Erro ao carregar publicações.');
+    } else {
+      this.feed.set((data as Noticia[]) ?? []);
+    }
+
+    this.feedLoading.set(false);
+  }
+
+  async publicarNoticia(): Promise<void> {
+    const tituloVal   = this.titulo.trim();
+    const conteudoVal = this.conteudo.trim();
+    if (!tituloVal || !conteudoVal) return;
+
+    this.publicando.set(true);
+    this.erroForm.set('');
+
+    const { error } = await this.noticiasService.inserirNoticia(
+      tituloVal,
+      conteudoVal,
+      this.userId(),
+      this.userNome(),
+    );
+
+    if (error) {
+      this.erroForm.set('Erro ao publicar. Verifique sua conexão e tente novamente.');
+    } else {
+      this.titulo   = '';
+      this.conteudo = '';
+      await this.carregarNoticias();
+    }
+
+    this.publicando.set(false);
+  }
+
+  async excluirNoticia(id: string): Promise<void> {
+    // Optimistic: remove da lista imediatamente para feedback instantâneo
+    this.feed.update(items => items.filter(n => n.id !== id));
+
+    const { error } = await this.noticiasService.deletarNoticia(id);
+    if (error) {
+      // Reverte se falhar
+      await this.carregarNoticias();
+    }
+  }
+
+  /** Regra de negócio: autor da notícia OU master admin podem excluir. */
+  podeExcluir(noticia: Noticia): boolean {
+    return noticia.autor_id === this.userId() || this.isMaster();
+  }
+
+  /** Formata data relativa amigável em pt-BR. */
+  formatarData(dateStr: string): string {
+    const date    = new Date(dateStr);
+    const diffMs  = Date.now() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60_000);
+    const diffH   = Math.floor(diffMs / 3_600_000);
+
+    if (diffMin < 1)  return 'Agora mesmo';
+    if (diffMin < 60) return `Há ${diffMin} min`;
+    if (diffH   < 24) return `Há ${diffH}h`;
+    if (diffH   < 48) return 'Ontem';
+    return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+  }
+
+  /** Cor de avatar determinística a partir do ID do autor. */
+  avatarColor(autorId: string): string {
+    let hash = 0;
+    for (let i = 0; i < autorId.length; i++) {
+      hash = (hash + autorId.charCodeAt(i)) % AVATAR_COLORS.length;
+    }
+    return AVATAR_COLORS[hash];
+  }
 }
