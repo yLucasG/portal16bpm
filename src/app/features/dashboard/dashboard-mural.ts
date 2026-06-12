@@ -649,7 +649,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
             <div>
               <p class="text-white font-bold text-base leading-none">Efetivo em Serviço</p>
               <p class="text-blue-200 text-xs mt-0.5">
-                {{ totalEfetivo() > 0 ? totalEfetivo() + ' PM no total' : efetivo().length + ' linha(s)' }}
+                {{ sheetsService.efetivoTotal() > 0 ? sheetsService.efetivoTotal() + ' PM no total' : efetivo().length + ' linha(s)' }}
               </p>
             </div>
           </div>
@@ -679,10 +679,10 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
               </div>
 
               <!-- Total -->
-              @if (totalEfetivo() > 0) {
+              @if (sheetsService.efetivoTotal() > 0) {
                 <div class="mx-4 my-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
                   <span class="text-xs font-bold text-blue-600 uppercase tracking-wide">Total em serviço</span>
-                  <span class="text-sm font-black text-blue-700">{{ totalEfetivo() }} PM</span>
+                  <span class="text-sm font-black text-blue-700">{{ sheetsService.efetivoTotal() }} PM</span>
                 </div>
               }
             }
@@ -703,7 +703,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
 export class DashboardMural implements OnInit, OnDestroy {
   private readonly auth           = inject(AuthService);
   private readonly noticiasService = inject(NoticiasService);
-  private readonly sheetsService  = inject(SheetsService);
+  public readonly sheetsService  = inject(SheetsService);
 
   // ── Auth state ─────────────────────────────────────────────────
   private readonly user     = computed(() => this.auth.session()?.user ?? null);

@@ -21,7 +21,7 @@ export class SheetsService {
 
   readonly viaturasAtivas = computed(() => this.dados().filter(d => d.tipo === 'Viatura' && d.status === 'Ativo').length);
   readonly viaturasTotal = computed(() => this.dados().filter(d => d.tipo === 'Viatura').length);
-  readonly efetivoTotal = computed(() => this.dados().filter(d => d.tipo === 'Efetivo').reduce((sum, item) => sum + (Number(item.quantidade) || 0), 0));
+  readonly efetivoTotal = computed(() => this.dados().filter(d => d.tipo === 'Efetivo').reduce((sum, item) => sum + (Number(item.quantidade.replace(',', '.')) || 0), 0));
 
   async buscarDados(): Promise<void> {
     try {
@@ -29,7 +29,7 @@ export class SheetsService {
         this.http.get(SHEETS_CSV_URL, { responseType: 'text' })
       );
       const parsed = this.parseCsv(csv);
-      console.log(parsed);
+      console.table(parsed);
       this.dados.set(parsed);
     } catch (err) {
       console.warn('[SheetsService] Falha ao buscar CSV:', err);
@@ -38,7 +38,7 @@ export class SheetsService {
   }
 
   private parseCsv(csv: string): SheetRow[] {
-    const lines = csv.split('\n');
+    const lines = csv.split(/\r?\n/).filter(line => line.trim() !== '');
     if (lines.length < 2) return [];
 
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
@@ -47,7 +47,6 @@ export class SheetsService {
 
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
-      if (!line.trim()) continue;
 
       const values = this.splitLine(line);
       const row: any = {};
