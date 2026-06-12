@@ -9,19 +9,19 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 // Pré-requisito Supabase: desabilitar confirmação de e-mail em
 //   Authentication → Providers → Email → "Confirm email" = OFF
 const SEED_USERS = [
-  { email: '1323385@portal16bpm.local', password: '0804', data: { nome: 'Layanne',        is_first_access: true } },
-  { email: '1323237@portal16bpm.local', password: '0405', data: { nome: 'W. Silva',        is_first_access: true } },
-  { email: '1123769@portal16bpm.local', password: '0811', data: { nome: 'Lincoln',         is_first_access: true } },
-  { email: '1175475@portal16bpm.local', password: '2206', data: { nome: 'Cibele Araújo',   is_first_access: true } },
-  { email: '1161237@portal16bpm.local', password: '1112', data: { nome: 'Diógenes',        is_first_access: true } },
-  { email: '1323172@portal16bpm.local', password: '0107', data: { nome: 'Allatas Sousa',   is_first_access: true } },
-  { email: '1324136@portal16bpm.local', password: '2209', data: { nome: 'Mayara',          is_first_access: true } },
-  { email: '1323377@portal16bpm.local', password: '2909', data: { nome: 'Jônatas Santos',  is_first_access: true } },
-  { email: '1263722@portal16bpm.local', password: '0308', data: { nome: 'Giovanni',        is_first_access: true } },
-  { email: '1323016@portal16bpm.local', password: '2508', data: { nome: 'Arcoverde',       is_first_access: true } },
-  { email: '1323768@portal16bpm.local', password: '1503', data: { nome: 'Jabner',          is_first_access: true } },
-  { email: '1136097@portal16bpm.local', password: '2506', data: { nome: 'José',            is_first_access: true } },
-  { email: '1224565@portal16bpm.local', password: '1212', data: { nome: 'Túlio Santana',   is_first_access: true } },
+  { email: '1323385@portal16bpm.local', password: '080400', data: { nome: 'Layanne',        is_first_access: true } },
+  { email: '1323237@portal16bpm.local', password: '040500', data: { nome: 'W. Silva',        is_first_access: true } },
+  { email: '1123769@portal16bpm.local', password: '081100', data: { nome: 'Lincoln',         is_first_access: true } },
+  { email: '1175475@portal16bpm.local', password: '220600', data: { nome: 'Cibele Araújo',   is_first_access: true } },
+  { email: '1161237@portal16bpm.local', password: '111200', data: { nome: 'Diógenes',        is_first_access: true } },
+  { email: '1323172@portal16bpm.local', password: '010700', data: { nome: 'Allatas Sousa',   is_first_access: true } },
+  { email: '1324136@portal16bpm.local', password: '220900', data: { nome: 'Mayara',          is_first_access: true } },
+  { email: '1323377@portal16bpm.local', password: '290900', data: { nome: 'Jônatas Santos',  is_first_access: true } },
+  { email: '1263722@portal16bpm.local', password: '030800', data: { nome: 'Giovanni',        is_first_access: true } },
+  { email: '1323016@portal16bpm.local', password: '250800', data: { nome: 'Arcoverde',       is_first_access: true } },
+  { email: '1323768@portal16bpm.local', password: '150300', data: { nome: 'Jabner',          is_first_access: true } },
+  { email: '1136097@portal16bpm.local', password: '250600', data: { nome: 'José',            is_first_access: true } },
+  { email: '1224565@portal16bpm.local', password: '121200', data: { nome: 'Túlio Santana',   is_first_access: true } },
 ];
 
 // ─── Ícone "olho" (reutilizado em 4 botões show/hide) ────────────────────────
