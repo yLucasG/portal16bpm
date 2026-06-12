@@ -1,97 +1,73 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-// ─── URLs dos CSVs publicados do Google Sheets ───────────────────────────────
-export const SHEETS_CSV_URLS = {
-  resumo: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=3&single=true&output=csv',
-  efetivo: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=4&single=true&output=csv',
-  viaturas: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=5&single=true&output=csv',
-  operacoes: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=6&single=true&output=csv'
-};
+export const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=3&single=true&output=csv';
 
 export interface SheetRow {
+  tipo: string;
+  nome: string;
+  quantidade: string;
+  local: string;
+  status: string;
   [key: string]: string;
-}
-
-export interface OperationalData {
-  resumo: SheetRow[];
-  efetivo: SheetRow[];
-  viaturas: SheetRow[];
-  operacoes: SheetRow[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class SheetsService {
   private readonly http = inject(HttpClient);
 
-  async buscarDados(): Promise<OperationalData> {
-    const result: OperationalData = {
-      resumo: [],
-      efetivo: [],
-      viaturas: [],
-      operacoes: []
-    };
+  readonly dados = signal<SheetRow[]>([]);
 
-    try {
-      const [resumo, efetivo, viaturas, operacoes] = await Promise.all([
-        this.fetchSheet(SHEETS_CSV_URLS.resumo),
-        this.fetchSheet(SHEETS_CSV_URLS.efetivo),
-        this.fetchSheet(SHEETS_CSV_URLS.viaturas),
-        this.fetchSheet(SHEETS_CSV_URLS.operacoes),
-      ]);
+  readonly viaturasAtivas = computed(() => this.dados().filter(d => d.tipo === 'Viatura' && d.status === 'Ativo').length);
+  readonly viaturasTotal = computed(() => this.dados().filter(d => d.tipo === 'Viatura').length);
+  readonly efetivoTotal = computed(() => this.dados().filter(d => d.tipo === 'Efetivo').reduce((sum, item) => sum + (Number(item.quantidade) || 0), 0));
 
-      result.resumo = resumo;
-      result.efetivo = efetivo;
-      result.viaturas = viaturas;
-      result.operacoes = operacoes;
-    } catch (err) {
-      console.warn('[SheetsService] Falha ao buscar dados (alguma aba falhou):', err);
-      throw err;
-    }
-
-    return result;
-  }
-
-  private async fetchSheet(url: string): Promise<SheetRow[]> {
-    if (!url || url.startsWith('COLE_AQUI')) {
-      return [];
-    }
+  async buscarDados(): Promise<void> {
     try {
       const csv = await firstValueFrom(
-        this.http.get(url, { responseType: 'text' }),
+        this.http.get(SHEETS_CSV_URL, { responseType: 'text' })
       );
-      return this.parseCsv(csv);
+      const parsed = this.parseCsv(csv);
+      console.log(parsed);
+      this.dados.set(parsed);
     } catch (err) {
-      console.warn(`[SheetsService] Falha ao buscar CSV da url ${url}:`, err);
+      console.warn('[SheetsService] Falha ao buscar CSV:', err);
       throw err;
     }
   }
 
   private parseCsv(csv: string): SheetRow[] {
-    const lines = csv
-      .trim()
-      .split('\n')
-      .map(l => l.trim())
-      .filter(l => l.length > 0);
-
+    const lines = csv.split('\n');
     if (lines.length < 2) return [];
 
-    const headers = this.splitLine(lines[0]).map(h => h.toLowerCase());
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
 
-    return lines
-      .slice(1)
-      .map(line => {
-        const values = this.splitLine(line);
-        const row: SheetRow = {};
-        headers.forEach((h, i) => {
-          row[h] = values[i] ?? '';
-        });
-        return row;
+    const result: SheetRow[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+
+      const values = this.splitLine(line);
+      const row: any = {};
+      headers.forEach((h, index) => {
+        row[h] = values[index] ?? '';
       });
+
+      result.push({
+        tipo: row['tipo'] || '',
+        nome: row['nome'] || '',
+        quantidade: row['quantidade'] || '',
+        local: row['local'] || '',
+        status: row['status'] || '',
+        ...row
+      });
+    }
+
+    return result;
   }
 
-  /** Divide uma linha CSV respeitando aspas duplas. */
   private splitLine(line: string): string[] {
     const result: string[] = [];
     let current = '';

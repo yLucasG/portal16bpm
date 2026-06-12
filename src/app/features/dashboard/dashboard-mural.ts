@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Noticia, NoticiasService } from '../../core/services/noticias.service';
-import { OperationalData, SheetRow, SheetsService } from '../../core/services/sheets.service';
+import { SheetRow, SheetsService } from '../../core/services/sheets.service';
 
 // Avatar colors — full strings aqui garantem detecção pelo scanner do Tailwind v4:
 // bg-blue-500 bg-indigo-500 bg-violet-500 bg-teal-500 bg-emerald-500 bg-amber-500
@@ -154,12 +154,12 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                 </svg>
               </div>
               <p class="text-[22px] font-black text-amber-500 leading-none mb-2.5">
-                {{ viaturas().length > 0 ? viaturas().length + '/15' : '12/15' }}
+                {{ sheetsService.viaturasAtivas() }} / {{ sheetsService.viaturasTotal() }}
               </p>
               <div class="flex items-center gap-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
                 <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">
-                  {{ viaturas().length > 0 ? 'Ver detalhes' : '80% disp.' }}
+                  {{ sheetsService.viaturasTotal() > 0 ? 'Ver detalhes' : 'Sem dados' }}
                 </span>
               </div>
             </button>
@@ -180,12 +180,12 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                 </svg>
               </div>
               <p class="text-[22px] font-black text-blue-500 leading-none mb-2.5">
-                {{ totalEfetivo() > 0 ? totalEfetivo() + ' PM' : '24 PM' }}
+                {{ sheetsService.efetivoTotal() }} PMs
               </p>
               <div class="flex items-center gap-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                 <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">
-                  {{ efetivo().length > 0 ? 'Ver detalhes' : 'Escala OK' }}
+                  {{ sheetsService.efetivoTotal() > 0 ? 'Ver detalhes' : 'Sem dados' }}
                 </span>
               </div>
             </button>
@@ -712,19 +712,15 @@ export class DashboardMural implements OnInit, OnDestroy {
   private readonly isMaster = computed(() => this.user()?.email === MASTER_ADMIN_EMAIL);
 
   // ── Google Sheets ────────────────────────────────────────────────
-  private readonly sheetsData = signal<OperationalData | null>(null);
   readonly sheetsErro = signal<string>('');
 
   readonly operacoes = computed(() => {
-    const ops = this.sheetsData()?.operacoes || [];
-    return ops.filter(r => r['status']?.toLowerCase() === 'ativa');
+    const ops = this.sheetsService.dados().filter(r => r.tipo === 'Operacao');
+    return ops.filter(r => r.status?.toLowerCase() === 'ativa');
   });
 
-  readonly viaturas = computed(() => this.sheetsData()?.viaturas || []);
-  readonly efetivo = computed(() => this.sheetsData()?.efetivo || []);
-  readonly resumo = computed(() => this.sheetsData()?.resumo || []);
-
-  readonly totalEfetivo = computed(() => this.efetivo().length);
+  readonly viaturas = computed(() => this.sheetsService.dados().filter(r => r.tipo === 'Viatura'));
+  readonly efetivo = computed(() => this.sheetsService.dados().filter(r => r.tipo === 'Efetivo'));
 
   // ── Modais ────────────────────────────────────────────────────────
   readonly modalOperacao    = signal<SheetRow | null>(null);
@@ -779,10 +775,9 @@ export class DashboardMural implements OnInit, OnDestroy {
   async carregarSheets(): Promise<void> {
     try {
       this.sheetsErro.set('');
-      const data = await this.sheetsService.buscarDados();
-      this.sheetsData.set(data);
+      await this.sheetsService.buscarDados();
     } catch (err) {
-      this.sheetsErro.set('Não foi possível conectar com as planilhas. Verifique sua conexão ou contate o administrador.');
+      this.sheetsErro.set('Não foi possível conectar com a planilha. Verifique sua conexão ou contate o administrador.');
     }
   }
 
