@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -20,7 +21,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
 
 @Component({
   selector: 'app-dashboard-mural',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, DecimalPipe],
   template: `
     <div class="min-h-screen bg-gray-50 pb-24">
 
@@ -102,41 +103,67 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
           </div>
           <div class="grid grid-cols-2 gap-3">
 
-            <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 p-4">
+            <!-- CARD MVIs DA SEMANA — clicável -->
+            <button
+              (click)="showMviModal.set(true)"
+              class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-red-400 p-4 text-left active:scale-95 transition-transform w-full"
+            >
               <div class="flex items-start justify-between mb-3">
                 <div>
-                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Meta MVI</p>
-                  <p class="text-[9px] text-slate-300 mt-0.5">Trimestre</p>
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">MVIs</p>
+                  <p class="text-[9px] text-slate-300 mt-0.5">Esta semana</p>
                 </div>
-                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
               </div>
-              <p class="text-[22px] font-black text-emerald-500 leading-none mb-2.5">↓ 68%</p>
+              <p class="text-[22px] font-black leading-none mb-2.5"
+                 [class]="sheetsService.mvisAtivos().length > 0 ? 'text-red-500' : 'text-slate-300'">
+                {{ sheetsService.mvisAtivos().length > 0 ? sheetsService.mvisAtivos().length : '—' }}
+              </p>
               <div class="flex items-center gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Atingida</span>
+                <div class="w-1.5 h-1.5 rounded-full"
+                     [class]="sheetsService.mvisAtivos().length > 0 ? 'bg-red-400' : 'bg-slate-300'"></div>
+                <span class="text-[10px] font-bold uppercase tracking-wide"
+                      [class]="sheetsService.mvisAtivos().length > 0 ? 'text-red-600' : 'text-slate-400'">
+                  {{ sheetsService.mvisAtivos().length > 0 ? (sheetsService.mvisPresos() + ' preso(s)') : 'Sem dados' }}
+                </span>
               </div>
-            </div>
+            </button>
 
-            <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 p-4">
+            <!-- CARD PRODUÇÃO — clicável -->
+            <button
+              (click)="showProducaoModal.set(true)"
+              class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-indigo-400 p-4 text-left active:scale-95 transition-transform w-full"
+            >
               <div class="flex items-start justify-between mb-3">
                 <div>
-                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Meta CVP</p>
-                  <p class="text-[9px] text-slate-300 mt-0.5">Trimestre</p>
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Produção</p>
+                  <p class="text-[9px] text-slate-300 mt-0.5">Este mês</p>
                 </div>
-                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
               </div>
-              <p class="text-[22px] font-black text-emerald-500 leading-none mb-2.5">↓ 68%</p>
+              <p class="text-[22px] font-black leading-none mb-2.5"
+                 [class]="sheetsService.producaoMetas().total > 0 ? 'text-indigo-500' : 'text-slate-300'">
+                @if (sheetsService.producaoMetas().total > 0) {
+                  {{ sheetsService.producaoMetas().atingidas }}/{{ sheetsService.producaoMetas().total }}
+                } @else {
+                  —
+                }
+              </p>
               <div class="flex items-center gap-1">
-                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Atingida</span>
+                <div class="w-1.5 h-1.5 rounded-full"
+                     [class]="sheetsService.producaoMetas().total > 0 ? 'bg-indigo-400' : 'bg-slate-300'"></div>
+                <span class="text-[10px] font-bold uppercase tracking-wide"
+                      [class]="sheetsService.producaoMetas().total > 0 ? 'text-indigo-600' : 'text-slate-400'">
+                  {{ sheetsService.producaoMetas().total > 0 ? 'Metas atingidas' : 'Sem dados' }}
+                </span>
               </div>
-            </div>
+            </button>
 
             <!-- CARD VIATURAS — clicável -->
             <button
@@ -508,6 +535,186 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
     </div>
 
     <!-- ══════════════════════════════════════════
+         MODAL — MVIs da Semana
+    ══════════════════════════════════════════ -->
+    @if (showMviModal()) {
+      <div class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
+           style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
+           (click)="showMviModal.set(false)">
+        <div class="bg-white w-full sm:max-w-sm sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[85vh] flex flex-col"
+             (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="bg-gradient-to-br from-red-600 to-rose-700 px-5 pt-6 pb-5 flex items-center gap-3 flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white font-bold text-base leading-none">MVIs da Semana</p>
+              <p class="text-rose-200 text-xs mt-0.5">
+                {{ sheetsService.mvisAtivos().length }} caso(s) · {{ sheetsService.mvisPresos() }} preso(s)
+              </p>
+            </div>
+          </div>
+
+          <!-- Lista -->
+          <div class="overflow-y-auto flex-1">
+            @if (sheetsService.mvisAtivos().length === 0) {
+              <div class="p-8 text-center">
+                <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-sm font-semibold text-slate-400">Nenhum MVI registrado</p>
+                <p class="text-xs text-slate-300 mt-1">Preencha a aba Dados_MVI na planilha</p>
+              </div>
+            } @else {
+              <div class="divide-y divide-slate-100">
+                @for (mvi of sheetsService.mvisAtivos(); track $index) {
+                  <div class="px-5 py-4">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-slate-800 leading-snug truncate">{{ mvi['vitima'] || '—' }}</p>
+                        <p class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                          <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          </svg>
+                          <span class="truncate">{{ mvi['local'] || '—' }}</span>
+                        </p>
+                      </div>
+                      <!-- Badge preso -->
+                      @if (mvi['preso']?.toLowerCase()?.startsWith('s')) {
+                        <span class="flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 uppercase tracking-wide">
+                          Preso
+                        </span>
+                      } @else {
+                        <span class="flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-lg bg-red-100 text-red-600 uppercase tracking-wide">
+                          Em aberto
+                        </span>
+                      }
+                    </div>
+                    <!-- Motivo + data -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md"
+                            [style.background]="getMotivoColor(mvi['motivo']).bg"
+                            [style.color]="getMotivoColor(mvi['motivo']).text">
+                        {{ mvi['motivo'] || 'Não informado' }}
+                      </span>
+                      @if (mvi['data']) {
+                        <span class="text-[10px] text-slate-400">{{ mvi['data'] }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="p-4 flex-shrink-0 border-t border-slate-100">
+            <button (click)="showMviModal.set(false)"
+                    class="w-full py-3 border-2 border-slate-200 text-slate-600 font-semibold text-sm rounded-2xl active:bg-slate-50 transition-colors">
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════
+         MODAL — Produção do Mês
+    ══════════════════════════════════════════ -->
+    @if (showProducaoModal()) {
+      <div class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
+           style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
+           (click)="showProducaoModal.set(false)">
+        <div class="bg-white w-full sm:max-w-sm sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[85vh] flex flex-col"
+             (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="bg-gradient-to-br from-indigo-600 to-violet-700 px-5 pt-6 pb-5 flex items-center gap-3 flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white font-bold text-base leading-none">Produção do Mês</p>
+              <p class="text-indigo-200 text-xs mt-0.5">
+                {{ sheetsService.producaoMetas().atingidas }}/{{ sheetsService.producaoMetas().total }} metas atingidas
+              </p>
+            </div>
+          </div>
+
+          <!-- Lista -->
+          <div class="overflow-y-auto flex-1">
+            @if (sheetsService.producaoDados().length === 0) {
+              <div class="p-8 text-center">
+                <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/>
+                </svg>
+                <p class="text-sm font-semibold text-slate-400">Sem dados de produção</p>
+                <p class="text-xs text-slate-300 mt-1">Preencha a aba Dados_Producao na planilha</p>
+              </div>
+            } @else {
+              <div class="p-4 space-y-3">
+                @for (item of sheetsService.producaoDados(); track $index) {
+                  <div class="bg-slate-50 rounded-2xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <p class="text-sm font-bold text-slate-800 leading-none">{{ item['categoria'] || '—' }}</p>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-sm font-black"
+                              [style.color]="getProducaoColor(item)">
+                          {{ item['quantidade'] || '0' }}
+                        </span>
+                        @if (item['meta'] && item['meta'] !== '0') {
+                          <span class="text-xs text-slate-400">/ {{ item['meta'] }} {{ item['unidade'] || '' }}</span>
+                        } @else {
+                          <span class="text-xs text-slate-400">{{ item['unidade'] || '' }}</span>
+                        }
+                      </div>
+                    </div>
+                    @if (item['meta'] && item['meta'] !== '0') {
+                      <!-- Barra de progresso vs meta -->
+                      <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500"
+                             [style.width]="getProducaoProgress(item) + '%'"
+                             [style.background]="getProducaoColor(item)">
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between mt-1.5">
+                        <span class="text-[10px] text-slate-400">Meta: {{ item['meta'] }} {{ item['unidade'] || '' }}</span>
+                        <span class="text-[10px] font-bold"
+                              [style.color]="getProducaoColor(item)">
+                          {{ getProducaoProgress(item) | number:'1.0-0' }}%
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="p-4 flex-shrink-0 border-t border-slate-100">
+            <button (click)="showProducaoModal.set(false)"
+                    class="w-full py-3 border-2 border-slate-200 text-slate-600 font-semibold text-sm rounded-2xl active:bg-slate-50 transition-colors">
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════
          MODAL — Operação (tag clicada no header)
     ══════════════════════════════════════════ -->
     @if (modalOperacao(); as op) {
@@ -726,6 +933,8 @@ export class DashboardMural implements OnInit, OnDestroy {
   readonly modalOperacao    = signal<SheetRow | null>(null);
   readonly showViaturaModal = signal(false);
   readonly showEfetivoModal = signal(false);
+  readonly showMviModal     = signal(false);
+  readonly showProducaoModal = signal(false);
 
   private refreshInterval: any;
 
@@ -755,7 +964,7 @@ export class DashboardMural implements OnInit, OnDestroy {
   // ── Lifecycle ────────────────────────────────────────────────────
   constructor() {
     effect(() => {
-      const isAnyModalOpen = this.showViaturaModal() || this.showEfetivoModal() || !!this.modalOperacao();
+      const isAnyModalOpen = this.showViaturaModal() || this.showEfetivoModal() || !!this.modalOperacao() || this.showMviModal() || this.showProducaoModal();
       if (isAnyModalOpen) {
         document.body.classList.add('body-modal-open');
       } else {
@@ -875,5 +1084,29 @@ export class DashboardMural implements OnInit, OnDestroy {
       hash = (hash + autorId.charCodeAt(i)) % AVATAR_COLORS.length;
     }
     return AVATAR_COLORS[hash];
+  }
+
+  /** Cor inline para badge de motivo do MVI — evita dependência do scanner Tailwind. */
+  getMotivoColor(motivo: string): { bg: string; text: string } {
+    const m = (motivo ?? '').toLowerCase();
+    if (m.includes('fogo') || m.includes('arma de fogo')) return { bg: '#fef2f2', text: '#dc2626' };
+    if (m.includes('branca') || m.includes('arma branca'))  return { bg: '#fff7ed', text: '#ea580c' };
+    return { bg: '#f8fafc', text: '#64748b' };
+  }
+
+  /** Percentual de progresso de um item de produção vs meta (capped 100%). */
+  getProducaoProgress(item: Record<string, string>): number {
+    const qtd  = Number(item['quantidade']?.replace(',', '.')) || 0;
+    const meta = Number(item['meta']?.replace(',', '.'))      || 0;
+    if (meta <= 0) return 0;
+    return Math.min((qtd / meta) * 100, 100);
+  }
+
+  /** Cor inline para barra de progresso de produção. */
+  getProducaoColor(item: Record<string, string>): string {
+    const pct = this.getProducaoProgress(item);
+    if (pct >= 100) return '#22c55e';   // verde: meta atingida
+    if (pct >= 60)  return '#f59e0b';   // âmbar: acima de 60%
+    return '#6366f1';                   // indigo: abaixo de 60%
   }
 }
