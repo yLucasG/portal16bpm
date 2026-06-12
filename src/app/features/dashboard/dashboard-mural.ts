@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface NewsItem {
   id: number;
@@ -67,6 +68,7 @@ const NEWS: NewsItem[] = [
 
 @Component({
   selector: 'app-dashboard-mural',
+  imports: [RouterLink],
   template: `
     <div class="min-h-screen bg-gray-50 pb-24">
 
@@ -250,6 +252,103 @@ const NEWS: NewsItem[] = [
               </div>
 
             }
+          </div>
+        </div>
+
+        <!-- ── MÓDULOS DO BATALHÃO ──────────────────────── -->
+        <div>
+          <div class="flex items-baseline justify-between mb-3">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Módulos do Batalhão</p>
+            <span class="text-[10px] text-slate-300 font-medium">16º BPM</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+            <!-- Material Bélico -->
+            <a routerLink="/modules/material-belico"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Material Bélico</p>
+            </a>
+
+            <!-- Almoxarifado -->
+            <a routerLink="/modules/almoxarifado"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Almoxarifado</p>
+            </a>
+
+            <!-- 1ª Cia -->
+            <a routerLink="/modules/1a-cia"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">1ª Cia</p>
+            </a>
+
+            <!-- 2ª Cia -->
+            <a routerLink="/modules/2a-cia"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">2ª Cia</p>
+            </a>
+
+            <!-- 3ª Cia -->
+            <a routerLink="/modules/3a-cia"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">3ª Cia</p>
+            </a>
+
+            <!-- SSTran -->
+            <a routerLink="/modules/sstran"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">SSTran</p>
+            </a>
+
+            <!-- Inteligência -->
+            <a routerLink="/modules/inteligencia"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Inteligência</p>
+            </a>
+
           </div>
         </div>
 

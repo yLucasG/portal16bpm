@@ -36,5 +36,13 @@ export const routes: Routes = [
       import('./features/reports/whatsapp-report/whatsapp-report').then(m => m.WhatsappReport),
     canActivate: [authGuard],
   },
+  {
+    path: 'modules/:id',
+    loadComponent: () =>
+      import('./features/modules/module-placeholder/module-placeholder').then(
+        m => m.ModulePlaceholder,
+      ),
+    canActivate: [authGuard],
+  },
   { path: '**', redirectTo: 'login' },
 ];
