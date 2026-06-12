@@ -1,4 +1,4 @@
-import { inject, Injectable, computed, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -11,51 +11,29 @@ export interface SheetRow {
   [key: string]: string;
 }
 
-const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub';
-
-// GIDs de cada aba — Giovanni atualiza os `null` com os GIDs corretos
-// após publicar cada aba via: Arquivo → Publicar na Web → CSV
-const GIDS: Record<string, number | null> = {
-  Resumo_Sistema: 100,   // aba 'Resumo_Sistema' — já configurada
-  Operacoes:      null,  // aba 'Operações'  → substituir pelo GID correto
-  Viaturas:       null,  // aba 'Viaturas'   → substituir pelo GID correto
-  Efetivo:        null,  // aba 'Efetivo'    → substituir pelo GID correto
-};
-
-const csvUrl = (gid: number) => `${BASE}?gid=${gid}&single=true&output=csv`;
+// Aba 'Dados_Portal' — única aba da planilha
+// Publicar via: Arquivo → Publicar na Web → Dados_Portal → CSV
+const DADOS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=100&single=true&output=csv';
 
 @Injectable({ providedIn: 'root' })
 export class SheetsService {
   private readonly http = inject(HttpClient);
 
-  // ── Aba Resumo_Sistema (sempre carregada) ───────────────────────
+  // Todos os dados da aba Dados_Portal
   readonly dados = signal<SheetRow[]>([]);
 
-  // ── Abas de detalhe (populadas se GID estiver configurado acima) ─
-  private readonly _operacoesDetalhe = signal<SheetRow[]>([]);
-  private readonly _viaturasDetalhe  = signal<SheetRow[]>([]);
-  private readonly _efetivoDetalhe   = signal<SheetRow[]>([]);
-
-  // ── Computed: usa aba dedicada se GID configurado, senão filtra do resumo ──
-  readonly operacoesAtivas = computed(() => {
-    const src = GIDS['Operacoes'] !== null
-      ? this._operacoesDetalhe()
-      : this.dados().filter(d => d.tipo === 'Operacao');
-    return src.filter(d => d.status?.toLowerCase().startsWith('ativ'));
-  });
-
-  readonly viaturas = computed(() =>
-    GIDS['Viaturas'] !== null
-      ? this._viaturasDetalhe()
-      : this.dados().filter(d => d.tipo === 'Viatura')
+  // Operações com status Ativo → tags no header + modal
+  readonly operacoesAtivas = computed(() =>
+    this.dados().filter(d => d.tipo === 'Operacao' && d.status?.toLowerCase().startsWith('ativ'))
   );
 
-  readonly efetivo = computed(() =>
-    GIDS['Efetivo'] !== null
-      ? this._efetivoDetalhe()
-      : this.dados().filter(d => d.tipo === 'Efetivo')
-  );
+  // Viaturas → modal de viaturas
+  readonly viaturas = computed(() => this.dados().filter(d => d.tipo === 'Viatura'));
 
+  // Efetivo → modal de efetivo
+  readonly efetivo = computed(() => this.dados().filter(d => d.tipo === 'Efetivo'));
+
+  // Contadores para os cards do dashboard
   readonly viaturasAtivas = computed(() =>
     this.viaturas().filter(d => !d.status?.toLowerCase().startsWith('baix')).length
   );
@@ -66,22 +44,11 @@ export class SheetsService {
     this.efetivo().reduce((sum, r) => sum + (Number(r.quantidade?.replace(',', '.')) || 0), 0)
   );
 
-  // ── Busca Resumo_Sistema + abas de detalhe configuradas ─────────
   async buscarTodos(): Promise<void> {
-    await this.fetchAba('Resumo_Sistema', this.dados);
-
-    const paralelas: Promise<void>[] = [];
-    if (GIDS['Operacoes'] !== null) paralelas.push(this.fetchAba('Operacoes', this._operacoesDetalhe));
-    if (GIDS['Viaturas']  !== null) paralelas.push(this.fetchAba('Viaturas',  this._viaturasDetalhe));
-    if (GIDS['Efetivo']   !== null) paralelas.push(this.fetchAba('Efetivo',   this._efetivoDetalhe));
-    if (paralelas.length) await Promise.allSettled(paralelas);
-  }
-
-  private async fetchAba(tab: string, target: WritableSignal<SheetRow[]>): Promise<void> {
-    const gid = GIDS[tab];
-    if (gid === null) return;
-    const csv = await firstValueFrom(this.http.get(csvUrl(gid), { responseType: 'text' }));
-    target.set(this.parseCsv(csv));
+    const csv = await firstValueFrom(
+      this.http.get(DADOS_URL, { responseType: 'text' })
+    );
+    this.dados.set(this.parseCsv(csv));
   }
 
   private parseCsv(csv: string): SheetRow[] {
