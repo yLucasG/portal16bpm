@@ -1,9 +1,9 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Noticia, NoticiasService } from '../../core/services/noticias.service';
-import { SheetRow, SheetsService } from '../../core/services/sheets.service';
+import { OperationalData, SheetRow, SheetsService } from '../../core/services/sheets.service';
 
 // Avatar colors — full strings aqui garantem detecção pelo scanner do Tailwind v4:
 // bg-blue-500 bg-indigo-500 bg-violet-500 bg-teal-500 bg-emerald-500 bg-amber-500
@@ -81,6 +81,18 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
            CONTEÚDO
       ════════════════════════════════════════════════════════ -->
       <div class="px-4 pt-5 space-y-6">
+
+        @if (sheetsErro()) {
+          <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <p class="text-sm font-bold text-red-800">Aviso do Sistema Operacional</p>
+              <p class="text-xs text-red-600 mt-0.5">{{ sheetsErro() }}</p>
+            </div>
+          </div>
+        }
 
         <!-- ── INDICADORES RÁPIDOS ─────────────────────────── -->
         <div>
@@ -527,8 +539,19 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                 </svg>
               </div>
               <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Local / Cia</p>
-                <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ op['local'] || 'Não informado' }}</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Área / Cia</p>
+                <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ op['area'] || op['cia'] || op['local'] || 'Não informado' }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 bg-blue-50 rounded-2xl px-4 py-3.5">
+              <div class="w-8 h-8 rounded-xl bg-blue-200 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wider leading-none">PMs Empenhados</p>
+                <p class="text-sm font-black text-blue-800 mt-0.5">{{ op['pms'] || op['efetivo'] || op['quantidade'] || '0' }} PMs</p>
               </div>
             </div>
             <button (click)="modalOperacao.set(null)"
@@ -677,7 +700,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
     }
   `,
 })
-export class DashboardMural implements OnInit {
+export class DashboardMural implements OnInit, OnDestroy {
   private readonly auth           = inject(AuthService);
   private readonly noticiasService = inject(NoticiasService);
   private readonly sheetsService  = inject(SheetsService);
@@ -689,21 +712,26 @@ export class DashboardMural implements OnInit {
   private readonly isMaster = computed(() => this.user()?.email === MASTER_ADMIN_EMAIL);
 
   // ── Google Sheets ────────────────────────────────────────────────
-  private readonly sheetsData = signal<SheetRow[]>([]);
-  readonly operacoes   = computed(() => this.sheetsData().filter(r => r['tipo'] === 'Operacao'));
-  readonly viaturas    = computed(() => this.sheetsData().filter(r => r['tipo'] === 'Viatura'));
-  readonly efetivo     = computed(() => this.sheetsData().filter(r => r['tipo'] === 'Efetivo'));
-  readonly totalEfetivo = computed(() =>
-    this.efetivo().reduce((acc, r) => {
-      const n = parseInt(r['nome'] ?? '0', 10);
-      return acc + (isNaN(n) ? 0 : n);
-    }, 0),
-  );
+  private readonly sheetsData = signal<OperationalData | null>(null);
+  readonly sheetsErro = signal<string>('');
+
+  readonly operacoes = computed(() => {
+    const ops = this.sheetsData()?.operacoes || [];
+    return ops.filter(r => r['status']?.toLowerCase() === 'ativa');
+  });
+
+  readonly viaturas = computed(() => this.sheetsData()?.viaturas || []);
+  readonly efetivo = computed(() => this.sheetsData()?.efetivo || []);
+  readonly resumo = computed(() => this.sheetsData()?.resumo || []);
+
+  readonly totalEfetivo = computed(() => this.efetivo().length);
 
   // ── Modais ────────────────────────────────────────────────────────
   readonly modalOperacao    = signal<SheetRow | null>(null);
   readonly showViaturaModal = signal(false);
   readonly showEfetivoModal = signal(false);
+
+  private refreshInterval: any;
 
   // ── Feed ────────────────────────────────────────────────────────
   readonly feed        = signal<Noticia[]>([]);
@@ -732,14 +760,30 @@ export class DashboardMural implements OnInit {
   ngOnInit(): void {
     this.carregarNoticias();
     this.carregarSheets();
+
+    // Auto-refresh dos dados operacionais a cada 60 segundos
+    this.refreshInterval = setInterval(() => {
+      this.carregarSheets();
+    }, 60000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   }
 
   // ── Métodos ──────────────────────────────────────────────────────
 
   // ── Sheets ──────────────────────────────────────────────────────
   async carregarSheets(): Promise<void> {
-    const rows = await this.sheetsService.buscarDados();
-    this.sheetsData.set(rows);
+    try {
+      this.sheetsErro.set('');
+      const data = await this.sheetsService.buscarDados();
+      this.sheetsData.set(data);
+    } catch (err) {
+      this.sheetsErro.set('Não foi possível conectar com as planilhas. Verifique sua conexão ou contate o administrador.');
+    }
   }
 
   abrirOperacao(op: SheetRow): void {

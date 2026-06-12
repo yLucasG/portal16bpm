@@ -2,45 +2,69 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-// ─── URL do CSV publicado do Google Sheets ────────────────────────────────────
-// Para obter: Planilha → Arquivo → Publicar na Web → Selecionar aba →
-//   Formato: Valores separados por vírgula (.csv) → Publicar → copiar link
-//
-// Estrutura esperada das colunas (3 colunas obrigatórias):
-//   tipo  | nome                   | local
-//   ------+------------------------+------------------
-//   Operacao | Op. Patrulha do Bairro | Centro / 1ª Cia
-//   Viatura  | GT16000               | Boa Vista
-//   Efetivo  | 15 PM                 | Centro
-//
-// Linhas com tipo diferente de 'Operacao', 'Viatura' ou 'Efetivo' são ignoradas.
-export const SHEETS_CSV_URL =
-  'COLE_AQUI_A_URL_DO_CSV_PUBLICADO_DO_GOOGLE_SHEETS';
+// ─── URLs dos CSVs publicados do Google Sheets ───────────────────────────────
+export const SHEETS_CSV_URLS = {
+  resumo: 'COLE_AQUI_A_URL_DO_CSV_RESUMO_SISTEMA',
+  efetivo: 'COLE_AQUI_A_URL_DO_CSV_EFETIVO',
+  viaturas: 'COLE_AQUI_A_URL_DO_CSV_VIATURAS',
+  operacoes: 'COLE_AQUI_A_URL_DO_CSV_OPERACOES'
+};
 
 export interface SheetRow {
-  tipo: string;
-  nome: string;
-  local: string;
   [key: string]: string;
+}
+
+export interface OperationalData {
+  resumo: SheetRow[];
+  efetivo: SheetRow[];
+  viaturas: SheetRow[];
+  operacoes: SheetRow[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class SheetsService {
   private readonly http = inject(HttpClient);
 
-  /** Busca o CSV e retorna um array de objetos com as colunas do cabeçalho. */
-  async buscarDados(): Promise<SheetRow[]> {
-    if (!SHEETS_CSV_URL || SHEETS_CSV_URL.startsWith('COLE_AQUI')) {
+  async buscarDados(): Promise<OperationalData> {
+    const result: OperationalData = {
+      resumo: [],
+      efetivo: [],
+      viaturas: [],
+      operacoes: []
+    };
+
+    try {
+      const [resumo, efetivo, viaturas, operacoes] = await Promise.all([
+        this.fetchSheet(SHEETS_CSV_URLS.resumo),
+        this.fetchSheet(SHEETS_CSV_URLS.efetivo),
+        this.fetchSheet(SHEETS_CSV_URLS.viaturas),
+        this.fetchSheet(SHEETS_CSV_URLS.operacoes),
+      ]);
+
+      result.resumo = resumo;
+      result.efetivo = efetivo;
+      result.viaturas = viaturas;
+      result.operacoes = operacoes;
+    } catch (err) {
+      console.warn('[SheetsService] Falha ao buscar dados (alguma aba falhou):', err);
+      throw err;
+    }
+
+    return result;
+  }
+
+  private async fetchSheet(url: string): Promise<SheetRow[]> {
+    if (!url || url.startsWith('COLE_AQUI')) {
       return [];
     }
     try {
       const csv = await firstValueFrom(
-        this.http.get(SHEETS_CSV_URL, { responseType: 'text' }),
+        this.http.get(url, { responseType: 'text' }),
       );
       return this.parseCsv(csv);
     } catch (err) {
-      console.warn('[SheetsService] Falha ao buscar CSV:', err);
-      return [];
+      console.warn(`[SheetsService] Falha ao buscar CSV da url ${url}:`, err);
+      throw err;
     }
   }
 
@@ -59,13 +83,12 @@ export class SheetsService {
       .slice(1)
       .map(line => {
         const values = this.splitLine(line);
-        const row: SheetRow = { tipo: '', nome: '', local: '' };
+        const row: SheetRow = {};
         headers.forEach((h, i) => {
           row[h] = values[i] ?? '';
         });
         return row;
-      })
-      .filter(row => row['tipo']?.trim().length > 0);
+      });
   }
 
   /** Divide uma linha CSV respeitando aspas duplas. */
