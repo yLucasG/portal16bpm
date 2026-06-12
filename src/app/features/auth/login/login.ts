@@ -4,26 +4,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
 
-// ─── Seed de usuários ─────────────────────────────────────────────────────────
-// ATENÇÃO: remover este bloco após o cadastro inicial de todos os usuários.
-// Pré-requisito Supabase: desabilitar confirmação de e-mail em
-//   Authentication → Providers → Email → "Confirm email" = OFF
-const SEED_USERS = [
-  { email: '1323385@portal16bpm.local', password: '080400', data: { nome: 'Layanne',        is_first_access: true } },
-  { email: '1323237@portal16bpm.local', password: '040500', data: { nome: 'W. Silva',        is_first_access: true } },
-  { email: '1123769@portal16bpm.local', password: '081100', data: { nome: 'Lincoln',         is_first_access: true } },
-  { email: '1175475@portal16bpm.local', password: '220600', data: { nome: 'Cibele Araújo',   is_first_access: true } },
-  { email: '1161237@portal16bpm.local', password: '111200', data: { nome: 'Diógenes',        is_first_access: true } },
-  { email: '1323172@portal16bpm.local', password: '010700', data: { nome: 'Allatas Sousa',   is_first_access: true } },
-  { email: '1324136@portal16bpm.local', password: '220900', data: { nome: 'Mayara',          is_first_access: true } },
-  { email: '1323377@portal16bpm.local', password: '290900', data: { nome: 'Jônatas Santos',  is_first_access: true } },
-  { email: '1263722@portal16bpm.local', password: '030800', data: { nome: 'Giovanni',        is_first_access: true } },
-  { email: '1323016@portal16bpm.local', password: '250800', data: { nome: 'Arcoverde',       is_first_access: true } },
-  { email: '1323768@portal16bpm.local', password: '150300', data: { nome: 'Jabner',          is_first_access: true } },
-  { email: '1136097@portal16bpm.local', password: '250600', data: { nome: 'José',            is_first_access: true } },
-  { email: '1224565@portal16bpm.local', password: '121200', data: { nome: 'Túlio Santana',   is_first_access: true } },
-];
-
 // ─── Ícone "olho" (reutilizado em 4 botões show/hide) ────────────────────────
 const EYE_SVG = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
   d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0
@@ -126,32 +106,6 @@ const EYE_SVG = `<path stroke-linecap="round" stroke-linejoin="round" stroke-wid
           </p>
 
         </form>
-
-        <!-- ── Botão de seed (temporário, discreto) ───────────────── -->
-        <div class="mt-10 text-center space-y-2">
-          <button
-            type="button"
-            (click)="initializeUsers()"
-            [disabled]="seedLoading()"
-            class="inline-flex items-center gap-1.5 text-gray-300 hover:text-gray-400 disabled:opacity-40 text-[11px] font-medium transition-colors"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94
-                3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724
-                0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426
-                1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724
-                1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543
-                .826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            {{ seedLoading() ? 'Inicializando...' : 'Inicializar Usuários' }}
-          </button>
-
-          @if (seedStatus()) {
-            <p class="text-[10px] text-gray-400 max-w-xs mx-auto leading-relaxed">{{ seedStatus() }}</p>
-          }
-        </div>
 
       </div>
     </div>
@@ -287,17 +241,13 @@ export class Login {
   primeiroAcessoLoading = signal(false);
   primeiroAcessoErro    = signal('');
 
-  // ── Seed ───────────────────────────────────────────────────────
-  seedLoading = signal(false);
-  seedStatus  = signal('');
-
   // ── Login: monta e-mail a partir da matrícula ─────────────────
   async onSubmit(): Promise<void> {
     this.loginLoading.set(true);
     this.loginErro.set('');
 
     const matriculaLimpa = this.matricula.replace(/\D/g, '');
-    const email = `${matriculaLimpa}@portal16bpm.local`;
+    const email = `${matriculaLimpa}@portal16bpm.com`;
 
     const { data, error } = await this.auth.signIn(email, this.senha);
 
@@ -342,33 +292,4 @@ export class Login {
     this.primeiroAcessoLoading.set(false);
   }
 
-  // ── Seed: cadastro em lote (uso único) ────────────────────────
-  async initializeUsers(): Promise<void> {
-    this.seedLoading.set(true);
-    this.seedStatus.set('');
-
-    let ok = 0;
-    let fail = 0;
-
-    for (const u of SEED_USERS) {
-      const { error } = await this.supabase.client.auth.signUp({
-        email: u.email,
-        password: u.password,
-        options: { data: u.data },
-      });
-
-      if (error) {
-        console.error(`❌ ${u.data.nome} (${u.email}):`, error.message);
-        fail++;
-      } else {
-        console.log(`✅ ${u.data.nome} (${u.email})`);
-        ok++;
-      }
-    }
-
-    this.seedStatus.set(
-      `${ok} usuário(s) criado(s)${fail ? `, ${fail} erro(s)` : ''}. Veja o console para detalhes.`,
-    );
-    this.seedLoading.set(false);
-  }
 }
