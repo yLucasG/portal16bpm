@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Noticia, NoticiasService } from '../../core/services/noticias.service';
+import { SheetRow, SheetsService } from '../../core/services/sheets.service';
 
 // Avatar colors — full strings aqui garantem detecção pelo scanner do Tailwind v4:
 // bg-blue-500 bg-indigo-500 bg-violet-500 bg-teal-500 bg-emerald-500 bg-amber-500
@@ -52,17 +53,27 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
         </p>
 
         <div class="flex items-center gap-2 mt-4 flex-wrap">
+          <!-- Portal Ativo com dot pulsante -->
           <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
-            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
             <span class="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Portal Ativo</span>
           </div>
-          <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
-            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span class="text-slate-400 text-[10px] font-semibold">Turno em andamento</span>
-          </div>
+
+          <!-- Tags de operações vindas do Google Sheets -->
+          @for (op of operacoes(); track op.nome) {
+            <button
+              (click)="abrirOperacao(op)"
+              class="flex items-center gap-1.5 bg-blue-500/20 border border-blue-400/30 rounded-lg px-3 py-1.5 active:scale-95 transition-transform"
+            >
+              <svg class="w-3 h-3 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span class="text-blue-200 text-[10px] font-bold uppercase tracking-wider max-w-[110px] truncate">
+                {{ op.nome }}
+              </span>
+            </button>
+          }
         </div>
       </div>
 
@@ -115,7 +126,11 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
               </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-amber-400 p-4">
+            <!-- CARD VIATURAS — clicável -->
+            <button
+              (click)="showViaturaModal.set(true)"
+              class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-amber-400 p-4 text-left active:scale-95 transition-transform w-full"
+            >
               <div class="flex items-start justify-between mb-3">
                 <div>
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Viaturas</p>
@@ -126,14 +141,22 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                     d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l4.5-2.5"/>
                 </svg>
               </div>
-              <p class="text-[22px] font-black text-amber-500 leading-none mb-2.5">12/15</p>
+              <p class="text-[22px] font-black text-amber-500 leading-none mb-2.5">
+                {{ viaturas().length > 0 ? viaturas().length + '/15' : '12/15' }}
+              </p>
               <div class="flex items-center gap-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">80% disp.</span>
+                <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">
+                  {{ viaturas().length > 0 ? 'Ver detalhes' : '80% disp.' }}
+                </span>
               </div>
-            </div>
+            </button>
 
-            <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-blue-400 p-4">
+            <!-- CARD EFETIVO — clicável -->
+            <button
+              (click)="showEfetivoModal.set(true)"
+              class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-blue-400 p-4 text-left active:scale-95 transition-transform w-full"
+            >
               <div class="flex items-start justify-between mb-3">
                 <div>
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Efetivo</p>
@@ -144,12 +167,16 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
               </div>
-              <p class="text-[22px] font-black text-blue-500 leading-none mb-2.5">24 PM</p>
+              <p class="text-[22px] font-black text-blue-500 leading-none mb-2.5">
+                {{ totalEfetivo() > 0 ? totalEfetivo() + ' PM' : '24 PM' }}
+              </p>
               <div class="flex items-center gap-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Escala OK</span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">
+                  {{ efetivo().length > 0 ? 'Ver detalhes' : 'Escala OK' }}
+                </span>
               </div>
-            </div>
+            </button>
 
           </div>
         </div>
@@ -467,17 +494,216 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
 
       </div>
     </div>
+
+    <!-- ══════════════════════════════════════════
+         MODAL — Operação (tag clicada no header)
+    ══════════════════════════════════════════ -->
+    @if (modalOperacao(); as op) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
+           (click)="modalOperacao.set(null)">
+        <div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
+             (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="bg-gradient-to-br from-slate-900 to-blue-950 px-6 pt-8 pb-6 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h2 class="text-white text-base font-bold leading-tight">{{ op['nome'] }}</h2>
+            <p class="text-blue-300 text-[10px] font-bold uppercase tracking-widest mt-1">Operação em Curso</p>
+          </div>
+
+          <!-- Body -->
+          <div class="p-5 space-y-3">
+            <div class="flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-3.5">
+              <div class="w-8 h-8 rounded-xl bg-slate-200 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Local / Cia</p>
+                <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ op['local'] || 'Não informado' }}</p>
+              </div>
+            </div>
+            <button (click)="modalOperacao.set(null)"
+                    class="w-full py-3 border-2 border-slate-200 text-slate-600 font-semibold text-sm rounded-2xl active:bg-slate-50 transition-colors">
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════
+         MODAL — Viaturas
+    ══════════════════════════════════════════ -->
+    @if (showViaturaModal()) {
+      <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+           style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
+           (click)="showViaturaModal.set(false)">
+        <div class="bg-white w-full sm:max-w-sm sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[80vh] flex flex-col"
+             (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="bg-gradient-to-br from-amber-500 to-orange-600 px-5 pt-6 pb-5 flex items-center gap-3 flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l4.5-2.5"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white font-bold text-base leading-none">Viaturas em Serviço</p>
+              <p class="text-orange-100 text-xs mt-0.5">{{ viaturas().length }} viatura(s) lançada(s)</p>
+            </div>
+          </div>
+
+          <!-- Lista -->
+          <div class="overflow-y-auto flex-1">
+            @if (viaturas().length === 0) {
+              <div class="p-6 text-center text-slate-400 text-sm">
+                Nenhum dado de viatura na planilha.
+              </div>
+            } @else {
+              <div class="divide-y divide-slate-100">
+                @for (v of viaturas(); track v['nome']) {
+                  <div class="flex items-center gap-3 px-5 py-3.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l4.5-2.5"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-bold text-slate-800 font-mono">{{ v['nome'] }}</p>
+                      <p class="text-xs text-slate-400 mt-0.5 truncate">{{ v['local'] || '—' }}</p>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                      <span class="text-[10px] text-emerald-600 font-semibold">Ativa</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="p-4 flex-shrink-0 border-t border-slate-100">
+            <button (click)="showViaturaModal.set(false)"
+                    class="w-full py-3 border-2 border-slate-200 text-slate-600 font-semibold text-sm rounded-2xl active:bg-slate-50 transition-colors">
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════
+         MODAL — Efetivo
+    ══════════════════════════════════════════ -->
+    @if (showEfetivoModal()) {
+      <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+           style="background:rgba(15,23,42,0.88);backdrop-filter:blur(6px)"
+           (click)="showEfetivoModal.set(false)">
+        <div class="bg-white w-full sm:max-w-sm sm:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl max-h-[80vh] flex flex-col"
+             (click)="$event.stopPropagation()">
+
+          <!-- Header -->
+          <div class="bg-gradient-to-br from-blue-600 to-indigo-700 px-5 pt-6 pb-5 flex items-center gap-3 flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white font-bold text-base leading-none">Efetivo em Serviço</p>
+              <p class="text-blue-200 text-xs mt-0.5">
+                {{ totalEfetivo() > 0 ? totalEfetivo() + ' PM no total' : efetivo().length + ' linha(s)' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Lista -->
+          <div class="overflow-y-auto flex-1">
+            @if (efetivo().length === 0) {
+              <div class="p-6 text-center text-slate-400 text-sm">
+                Nenhum dado de efetivo na planilha.
+              </div>
+            } @else {
+              <div class="divide-y divide-slate-100">
+                @for (e of efetivo(); track $index) {
+                  <div class="flex items-center gap-3 px-5 py-3.5">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-bold text-slate-800">{{ e['nome'] || '—' }}</p>
+                      <p class="text-xs text-slate-400 mt-0.5 truncate">{{ e['local'] || '—' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Total -->
+              @if (totalEfetivo() > 0) {
+                <div class="mx-4 my-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                  <span class="text-xs font-bold text-blue-600 uppercase tracking-wide">Total em serviço</span>
+                  <span class="text-sm font-black text-blue-700">{{ totalEfetivo() }} PM</span>
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="p-4 flex-shrink-0 border-t border-slate-100">
+            <button (click)="showEfetivoModal.set(false)"
+                    class="w-full py-3 border-2 border-slate-200 text-slate-600 font-semibold text-sm rounded-2xl active:bg-slate-50 transition-colors">
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   `,
 })
 export class DashboardMural implements OnInit {
   private readonly auth           = inject(AuthService);
   private readonly noticiasService = inject(NoticiasService);
+  private readonly sheetsService  = inject(SheetsService);
 
   // ── Auth state ─────────────────────────────────────────────────
   private readonly user     = computed(() => this.auth.session()?.user ?? null);
   readonly userId           = computed(() => this.user()?.id ?? '');
   readonly userNome         = computed(() => this.user()?.user_metadata?.['nome'] ?? 'Oficial');
   private readonly isMaster = computed(() => this.user()?.email === MASTER_ADMIN_EMAIL);
+
+  // ── Google Sheets ────────────────────────────────────────────────
+  private readonly sheetsData = signal<SheetRow[]>([]);
+  readonly operacoes   = computed(() => this.sheetsData().filter(r => r['tipo'] === 'Operacao'));
+  readonly viaturas    = computed(() => this.sheetsData().filter(r => r['tipo'] === 'Viatura'));
+  readonly efetivo     = computed(() => this.sheetsData().filter(r => r['tipo'] === 'Efetivo'));
+  readonly totalEfetivo = computed(() =>
+    this.efetivo().reduce((acc, r) => {
+      const n = parseInt(r['nome'] ?? '0', 10);
+      return acc + (isNaN(n) ? 0 : n);
+    }, 0),
+  );
+
+  // ── Modais ────────────────────────────────────────────────────────
+  readonly modalOperacao    = signal<SheetRow | null>(null);
+  readonly showViaturaModal = signal(false);
+  readonly showEfetivoModal = signal(false);
 
   // ── Feed ────────────────────────────────────────────────────────
   readonly feed        = signal<Noticia[]>([]);
@@ -505,10 +731,22 @@ export class DashboardMural implements OnInit {
   // ── Lifecycle ────────────────────────────────────────────────────
   ngOnInit(): void {
     this.carregarNoticias();
+    this.carregarSheets();
   }
 
   // ── Métodos ──────────────────────────────────────────────────────
 
+  // ── Sheets ──────────────────────────────────────────────────────
+  async carregarSheets(): Promise<void> {
+    const rows = await this.sheetsService.buscarDados();
+    this.sheetsData.set(rows);
+  }
+
+  abrirOperacao(op: SheetRow): void {
+    this.modalOperacao.set(op);
+  }
+
+  // ── Noticias ────────────────────────────────────────────────────
   async carregarNoticias(): Promise<void> {
     this.feedLoading.set(true);
     this.feedErro.set('');
