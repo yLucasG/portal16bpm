@@ -23,9 +23,9 @@ const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2U
 
 // GIDs — preencher os null com os GIDs das novas abas após publicar
 const GIDS: Record<string, number | null> = {
-  Dados_Portal: 100,   // aba 'Dados_Portal'   — já configurada
-  MVI:          null,  // aba 'Dados_MVI'       → preencher GID
-  Producao:     null,  // aba 'Dados_Producao'  → preencher GID
+  Dados_Portal: 100,          // aba 'Dados_Portal'
+  MVI:          2094848767,   // aba 'Dados_MVI'
+  Producao:     935275335,    // aba 'Dados_Producao'
 };
 
 const csvUrl = (gid: number) => `${BASE}?gid=${gid}&single=true&output=csv`;
