@@ -4,10 +4,10 @@ import { firstValueFrom } from 'rxjs';
 
 // ─── URLs dos CSVs publicados do Google Sheets ───────────────────────────────
 export const SHEETS_CSV_URLS = {
-  resumo: 'COLE_AQUI_A_URL_DO_CSV_RESUMO_SISTEMA',
-  efetivo: 'COLE_AQUI_A_URL_DO_CSV_EFETIVO',
-  viaturas: 'COLE_AQUI_A_URL_DO_CSV_VIATURAS',
-  operacoes: 'COLE_AQUI_A_URL_DO_CSV_OPERACOES'
+  resumo: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=3&single=true&output=csv',
+  efetivo: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=4&single=true&output=csv',
+  viaturas: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=5&single=true&output=csv',
+  operacoes: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSwRRYDLSnJODf2t2UQPBPsbb4sHQ5fZvT6_p04Z25EnT_dG0MbyYZx0E3bqFX__05ch_CPqSPClCvY/pub?gid=6&single=true&output=csv'
 };
 
 export interface SheetRow {
