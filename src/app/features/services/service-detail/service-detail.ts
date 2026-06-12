@@ -11,29 +11,32 @@ const ESSENTIAL_LINKS = [
   {
     label: 'Portal PMPE',
     url: 'https://portalpmpe.sistemas.pm.pe.gov.br/login',
-    svg: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    iconBg: '#1e3a8a',
+    svg: `<svg class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0
-        01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622
-        5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0
+        0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0
+        012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </svg>`,
   },
   {
-    label: 'Autovision',
+    label: 'Autovision SDS',
     url: 'https://www.autovision.com.br/sds/index.php',
-    svg: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    iconBg: '#15803d',
+    svg: `<svg class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-        d="M15 10l4.553-2.069A1 1 0 0121 8.868V15.13a1 1 0 01-1.447.894L15
-        14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+        d="M15 10l4.553-2.069A1 1 0 0121 8.868V15.13a1 1 0 01-1.447.894L15 14
+        M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
     </svg>`,
   },
   {
-    label: 'PM Conectado',
-    url: 'https://pmconectado.pm.pe.gov.br',
-    svg: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2
-        2v14a2 2 0 002 2z" />
+    label: 'Power BI SDS',
+    url: 'https://powerbi.pe.gov.br/relatorios/browse/SDS/GGACE',
+    iconBg: '#d97706',
+    svg: `<svg class="w-5 h-5" fill="white" viewBox="0 0 24 24">
+      <rect x="2" y="13" width="4" height="9" rx="1"/>
+      <rect x="9" y="8" width="4" height="14" rx="1"/>
+      <rect x="16" y="3" width="4" height="19" rx="1"/>
     </svg>`,
   },
 ];
@@ -133,7 +136,8 @@ const ESSENTIAL_LINKS = [
                 rel="noopener noreferrer"
                 class="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 active:bg-indigo-50 active:scale-95 transition-all"
               >
-                <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600"
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                     [style.background]="link.iconBg"
                      [innerHTML]="link.svg">
                 </div>
                 <span class="text-[10px] font-semibold text-gray-600 text-center leading-tight">
