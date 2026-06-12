@@ -23,5 +23,11 @@ export const routes: Routes = [
       import('./features/services/service-detail/service-detail').then(m => m.ServiceDetail),
     canActivate: [authGuard],
   },
+  {
+    path: 'reports',
+    loadComponent: () =>
+      import('./features/reports/whatsapp-report/whatsapp-report').then(m => m.WhatsappReport),
+    canActivate: [authGuard],
+  },
   { path: '**', redirectTo: 'login' },
 ];
