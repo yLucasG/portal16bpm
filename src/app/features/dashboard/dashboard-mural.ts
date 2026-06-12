@@ -405,6 +405,54 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
               <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Inteligência</p>
             </a>
 
+            <!-- P1 — Pessoal -->
+            <a routerLink="/modules/p1"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">P1 — Pessoal</p>
+            </a>
+
+            <!-- P3 — Operações -->
+            <a routerLink="/modules/p3"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">P3 — Operações</p>
+            </a>
+
+            <!-- P4 — Logística -->
+            <a routerLink="/modules/p4"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">P4 — Logística</p>
+            </a>
+
+            <!-- Arquivo -->
+            <a routerLink="/modules/arquivo"
+               class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-3 active:scale-95 transition-transform">
+              <div class="w-12 h-12 rounded-2xl bg-sky-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                    d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-semibold text-slate-700 text-center leading-tight">Arquivo</p>
+            </a>
+
           </div>
         </div>
 

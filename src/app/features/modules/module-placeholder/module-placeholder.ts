@@ -44,6 +44,26 @@ const MODULE_META: Record<string, ModuleMeta> = {
     emoji: '🔍',
     tagline: 'Seção de Inteligência do 16º BPM — análise, dados e informações estratégicas.',
   },
+  p1: {
+    name: 'P1 — Pessoal',
+    emoji: '🪪',
+    tagline: 'Seção de Pessoal — gestão de efetivo, escalas, fichas funcionais e promoções do 16º BPM.',
+  },
+  p3: {
+    name: 'P3 — Operações',
+    emoji: '🗺️',
+    tagline: 'Seção de Operações — planejamento tático, ordens de operações e coordenação de ações policiais.',
+  },
+  p4: {
+    name: 'P4 — Logística',
+    emoji: '🚛',
+    tagline: 'Seção de Logística — controle de frota, suprimentos, manutenção e recursos materiais.',
+  },
+  arquivo: {
+    name: 'Arquivo',
+    emoji: '🗂️',
+    tagline: 'Arquivo Geral do 16º BPM — gestão de documentos, boletins, ofícios e registros históricos.',
+  },
 };
 
 const FALLBACK: ModuleMeta = {
