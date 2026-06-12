@@ -37,6 +37,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'contacts',
+    loadComponent: () =>
+      import('./features/contacts/contacts').then(m => m.Contacts),
+    canActivate: [authGuard],
+  },
+  {
     path: 'modules/:id',
     loadComponent: () =>
       import('./features/modules/module-placeholder/module-placeholder').then(
