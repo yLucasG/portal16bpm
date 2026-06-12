@@ -60,7 +60,7 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
           </div>
 
           <!-- Tags de operações vindas do Google Sheets -->
-          @for (op of operacoes(); track op.nome) {
+          @for (op of sheetsService.operacoesAtivas(); track op.nome) {
             <button
               (click)="abrirOperacao(op)"
               class="flex items-center gap-1.5 bg-blue-500/20 border border-blue-400/30 rounded-lg px-3 py-1.5 active:scale-95 transition-transform"
@@ -608,8 +608,13 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                       <p class="text-xs text-slate-400 mt-0.5 truncate">{{ v['local'] || '—' }}</p>
                     </div>
                     <div class="flex items-center gap-1">
-                      <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                      <span class="text-[10px] text-emerald-600 font-semibold">Ativa</span>
+                      @if (v['status']?.toLowerCase() === 'baixada') {
+                        <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                        <span class="text-[10px] text-red-600 font-semibold uppercase tracking-wide">Baixada</span>
+                      } @else {
+                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                        <span class="text-[10px] text-emerald-600 font-semibold uppercase tracking-wide">Ativa</span>
+                      }
                     </div>
                   </div>
                 }
@@ -649,20 +654,20 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
             <div>
               <p class="text-white font-bold text-base leading-none">Efetivo em Serviço</p>
               <p class="text-blue-200 text-xs mt-0.5">
-                {{ sheetsService.efetivoTotal() > 0 ? sheetsService.efetivoTotal() + ' PM no total' : efetivo().length + ' linha(s)' }}
+                {{ sheetsService.efetivoTotal() > 0 ? sheetsService.efetivoTotal() + ' PM no total' : sheetsService.dados().length + ' linha(s)' }}
               </p>
             </div>
           </div>
 
           <!-- Lista -->
           <div class="overflow-y-auto flex-1">
-            @if (efetivo().length === 0) {
+            @if (sheetsService.dados().length === 0) {
               <div class="p-6 text-center text-slate-400 text-sm">
-                Nenhum dado de efetivo na planilha.
+                Nenhum dado na planilha.
               </div>
             } @else {
               <div class="divide-y divide-slate-100">
-                @for (e of efetivo(); track $index) {
+                @for (e of sheetsService.dados(); track $index) {
                   <div class="flex items-center gap-3 px-5 py-3.5">
                     <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                       <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -673,6 +678,10 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
                     <div class="flex-1 min-w-0">
                       <p class="text-sm font-bold text-slate-800">{{ e['nome'] || '—' }}</p>
                       <p class="text-xs text-slate-400 mt-0.5 truncate">{{ e['local'] || '—' }}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                      <span class="text-[9px] font-bold text-blue-600 uppercase tracking-wider bg-blue-100 px-2 py-0.5 rounded-md">{{ e['tipo'] || '—' }}</span>
+                      <span class="text-xs font-semibold text-slate-600">{{ e['quantidade'] || '0' }} PM(s)</span>
                     </div>
                   </div>
                 }
@@ -714,13 +723,7 @@ export class DashboardMural implements OnInit, OnDestroy {
   // ── Google Sheets ────────────────────────────────────────────────
   readonly sheetsErro = signal<string>('');
 
-  readonly operacoes = computed(() => {
-    const ops = this.sheetsService.dados().filter(r => r.tipo === 'Operacao');
-    return ops.filter(r => r.status?.toLowerCase() === 'ativa');
-  });
-
   readonly viaturas = computed(() => this.sheetsService.dados().filter(r => r.tipo === 'Viatura'));
-  readonly efetivo = computed(() => this.sheetsService.dados().filter(r => r.tipo === 'Efetivo'));
 
   // ── Modais ────────────────────────────────────────────────────────
   readonly modalOperacao    = signal<SheetRow | null>(null);

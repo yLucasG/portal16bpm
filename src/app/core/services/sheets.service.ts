@@ -21,7 +21,8 @@ export class SheetsService {
 
   readonly viaturasAtivas = computed(() => this.dados().filter(d => d.tipo === 'Viatura' && d.status === 'Ativo').length);
   readonly viaturasTotal = computed(() => this.dados().filter(d => d.tipo === 'Viatura').length);
-  readonly efetivoTotal = computed(() => this.dados().filter(d => d.tipo === 'Efetivo').reduce((sum, item) => sum + (Number(item.quantidade.replace(',', '.')) || 0), 0));
+  readonly efetivoTotal = computed(() => this.dados().reduce((sum, item) => sum + (Number(item.quantidade.replace(',', '.')) || 0), 0));
+  readonly operacoesAtivas = computed(() => this.dados().filter(d => d.tipo === 'Operacao' && d.status === 'Ativo'));
 
   async buscarDados(): Promise<void> {
     try {
