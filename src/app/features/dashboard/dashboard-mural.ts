@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -756,6 +756,17 @@ export class DashboardMural implements OnInit, OnDestroy {
   }).replace(/^./, c => c.toUpperCase());
 
   // ── Lifecycle ────────────────────────────────────────────────────
+  constructor() {
+    effect(() => {
+      const isAnyModalOpen = this.showViaturaModal() || this.showEfetivoModal() || !!this.modalOperacao();
+      if (isAnyModalOpen) {
+        document.body.classList.add('overflow-hidden');
+      } else {
+        document.body.classList.remove('overflow-hidden');
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.carregarNoticias();
     this.carregarSheets();
