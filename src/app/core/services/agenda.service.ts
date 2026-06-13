@@ -20,8 +20,8 @@ export interface NovoEvento {
   titulo: string;
   descricao: string;
   data: string;
-  hora: string;
-  hora_fim: string;
+  hora: string | null;
+  hora_fim: string | null;
   tag_cor: 'blue' | 'red' | 'green';
   avisar_whatsapp: boolean;
   telefone_whatsapp: string;
