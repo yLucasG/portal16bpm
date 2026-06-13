@@ -103,6 +103,23 @@ const MESES = [
           </div>
         }
 
+        <!-- Banner: tabela não existe no Supabase -->
+        @if (erroCarregamento()) {
+          <div class="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <p class="text-sm font-bold text-amber-800">Configuração pendente</p>
+              <p class="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                A tabela <strong>agenda</strong> ainda não existe no Supabase.
+                Execute o SQL de criação no painel do Supabase para ativar este módulo.
+              </p>
+            </div>
+          </div>
+        }
+
         <!-- Legenda -->
         <div class="flex items-center gap-4 justify-center mt-5 pb-2">
           @for (entry of legendaEntries; track entry[0]) {
@@ -366,6 +383,7 @@ export class Agenda implements OnInit {
   readonly anoAtual  = signal(new Date().getFullYear());
   readonly eventos   = signal<AgendaEvento[]>([]);
   readonly carregando = signal(false);
+  readonly erroCarregamento = signal('');
 
   readonly diaSelecionado = signal<number | null>(null);
   readonly abaModal       = signal<'lista' | 'novo'>('lista');
@@ -450,8 +468,13 @@ export class Agenda implements OnInit {
     const uid = this.userId();
     if (!uid) return;
     this.carregando.set(true);
-    const { data } = await this.agendaService.buscarMes(uid, this.anoAtual(), this.mesAtual());
-    this.eventos.set((data as AgendaEvento[]) ?? []);
+    this.erroCarregamento.set('');
+    const { data, error } = await this.agendaService.buscarMes(uid, this.anoAtual(), this.mesAtual());
+    if (error) {
+      this.erroCarregamento.set('tabela_inexistente');
+    } else {
+      this.eventos.set((data as AgendaEvento[]) ?? []);
+    }
     this.carregando.set(false);
   }
 
