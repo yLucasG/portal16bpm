@@ -6,25 +6,25 @@ export interface AgendaEvento {
   usuario_id: string;
   titulo: string;
   descricao: string | null;
-  data: string;       // 'YYYY-MM-DD'
-  hora: string | null;      // 'HH:MM'
-  hora_fim: string | null;  // 'HH:MM'
+  data_evento: string;       // 'YYYY-MM-DD'
+  hora_evento: string | null; // 'HH:MM'
+  hora_fim: string | null;    // 'HH:MM'
   tag_cor: 'blue' | 'red' | 'green';
-  avisar_whatsapp: boolean;
-  telefone_whatsapp: string | null;
-  created_at: string;
+  notificar_wpp: boolean;
+  telefone_wpp: string | null;
+  criado_em: string;
 }
 
 export interface NovoEvento {
   usuario_id: string;
   titulo: string;
   descricao: string;
-  data: string;
-  hora: string | null;
+  data_evento: string;
+  hora_evento: string | null;
   hora_fim: string | null;
   tag_cor: 'blue' | 'red' | 'green';
-  avisar_whatsapp: boolean;
-  telefone_whatsapp: string;
+  notificar_wpp: boolean;
+  telefone_wpp: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,7 +32,7 @@ export class AgendaService {
   private readonly db = inject(SupabaseService).client;
 
   buscarMes(usuarioId: string, ano: number, mes: number) {
-    const mm    = String(mes + 1).padStart(2, '0');
+    const mm     = String(mes + 1).padStart(2, '0');
     const inicio = `${ano}-${mm}-01`;
     const ultimo = new Date(ano, mes + 1, 0).getDate();
     const fim    = `${ano}-${mm}-${String(ultimo).padStart(2, '0')}`;
@@ -40,9 +40,9 @@ export class AgendaService {
       .from('agenda')
       .select('*')
       .eq('usuario_id', usuarioId)
-      .gte('data', inicio)
-      .lte('data', fim)
-      .order('hora', { ascending: true });
+      .gte('data_evento', inicio)
+      .lte('data_evento', fim)
+      .order('hora_evento', { ascending: true });
   }
 
   inserir(evento: NovoEvento) {
