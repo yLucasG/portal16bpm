@@ -7,7 +7,8 @@ export interface AgendaEvento {
   titulo: string;
   descricao: string | null;
   data: string;       // 'YYYY-MM-DD'
-  hora: string | null; // 'HH:MM'
+  hora: string | null;      // 'HH:MM'
+  hora_fim: string | null;  // 'HH:MM'
   tag_cor: 'blue' | 'red' | 'green';
   avisar_whatsapp: boolean;
   telefone_whatsapp: string | null;
@@ -20,6 +21,7 @@ export interface NovoEvento {
   descricao: string;
   data: string;
   hora: string;
+  hora_fim: string;
   tag_cor: 'blue' | 'red' | 'green';
   avisar_whatsapp: boolean;
   telefone_whatsapp: string;

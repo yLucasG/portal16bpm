@@ -184,7 +184,9 @@ const MESES = [
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center gap-2 mb-1">
                             @if (ev.hora) {
-                              <span class="text-xs font-black text-gray-500 font-mono">{{ ev.hora }}</span>
+                              <span class="text-xs font-black text-gray-500 font-mono">
+                                {{ ev.hora }}{{ ev.hora_fim ? ' às ' + ev.hora_fim : '' }}
+                              </span>
                             }
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-md" [class]="tag(ev.tag_cor).badge">
                               {{ tag(ev.tag_cor).label }}
@@ -248,10 +250,10 @@ const MESES = [
                   ></textarea>
                 </div>
 
-                <!-- Hora + Tag na mesma linha -->
+                <!-- Hora início + Hora fim -->
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Hora</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Hora Início</label>
                     <input
                       type="time"
                       [(ngModel)]="form.hora"
@@ -260,17 +262,28 @@ const MESES = [
                     />
                   </div>
                   <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Categoria</label>
-                    <select
-                      [(ngModel)]="form.tag_cor"
-                      name="tag_cor"
-                      class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                    >
-                      <option value="blue">Escala</option>
-                      <option value="red">Prazo / IPM</option>
-                      <option value="green">Rotina</option>
-                    </select>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Hora Final <span class="text-gray-300 normal-case font-normal">(opcional)</span></label>
+                    <input
+                      type="time"
+                      [(ngModel)]="form.hora_fim"
+                      name="hora_fim"
+                      class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                    />
                   </div>
+                </div>
+
+                <!-- Categoria -->
+                <div>
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Categoria</label>
+                  <select
+                    [(ngModel)]="form.tag_cor"
+                    name="tag_cor"
+                    class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                  >
+                    <option value="blue">Escala</option>
+                    <option value="red">Prazo / IPM</option>
+                    <option value="green">Rotina</option>
+                  </select>
                 </div>
 
                 <!-- Aviso WhatsApp toggle -->
@@ -363,6 +376,7 @@ export class Agenda implements OnInit {
     titulo: '',
     descricao: '',
     hora: '',
+    hora_fim: '',
     tag_cor: 'blue' as TagCor,
     avisar_whatsapp: false,
     telefone_whatsapp: '',
@@ -455,7 +469,7 @@ export class Agenda implements OnInit {
   }
 
   private resetForm(): void {
-    this.form = { titulo: '', descricao: '', hora: '', tag_cor: 'blue', avisar_whatsapp: false, telefone_whatsapp: '' };
+    this.form = { titulo: '', descricao: '', hora: '', hora_fim: '', tag_cor: 'blue', avisar_whatsapp: false, telefone_whatsapp: '' };
   }
 
   // ── CRUD ──────────────────────────────────────────────────────
@@ -470,6 +484,7 @@ export class Agenda implements OnInit {
       descricao:          this.form.descricao.trim(),
       data:               this.diaKey(this.diaSelecionado()!),
       hora:               this.form.hora,
+      hora_fim:           this.form.hora_fim,
       tag_cor:            this.form.tag_cor,
       avisar_whatsapp:    this.form.avisar_whatsapp,
       telefone_whatsapp:  this.form.telefone_whatsapp.trim(),
