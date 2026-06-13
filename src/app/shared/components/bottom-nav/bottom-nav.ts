@@ -31,6 +31,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span class="text-xs font-medium">Serviços</span>
       </a>
+
+      <a
+        routerLink="/agenda"
+        routerLinkActive="text-blue-600"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="flex flex-col items-center gap-1 text-gray-400 flex-1 py-2 transition-colors"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span class="text-xs font-medium">Agenda</span>
+      </a>
     </nav>
   `,
 })

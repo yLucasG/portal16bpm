@@ -37,6 +37,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'agenda',
+    loadComponent: () =>
+      import('./features/agenda/agenda').then(m => m.Agenda),
+    canActivate: [authGuard],
+  },
+  {
     path: 'contacts',
     loadComponent: () =>
       import('./features/contacts/contacts').then(m => m.Contacts),
