@@ -40,7 +40,20 @@ const MASTER_ADMIN_EMAIL = '1263722@portal16bpm.com';
               <p class="text-white text-xs font-semibold leading-tight mt-0.5">Batalhão Frei Caneca</p>
             </div>
           </div>
-          <p class="text-slate-300 text-[11px] font-medium">{{ today }}</p>
+          <div class="flex flex-col items-end gap-2">
+            <p class="text-slate-300 text-[11px] font-medium">{{ today }}</p>
+            <button
+              (click)="sair()"
+              class="flex items-center gap-1.5 text-slate-400 hover:text-red-400 active:scale-95 transition-all"
+              title="Sair"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              <span class="text-[10px] font-bold uppercase tracking-wider">Sair</span>
+            </button>
+          </div>
         </div>
 
         <div class="mb-3">
@@ -1003,6 +1016,10 @@ export class DashboardMural implements OnInit, OnDestroy {
 
   abrirOperacao(op: SheetRow): void {
     this.modalOperacao.set(op);
+  }
+
+  sair(): void {
+    this.auth.signOut();
   }
 
   // ── Noticias ────────────────────────────────────────────────────
