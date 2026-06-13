@@ -303,14 +303,13 @@ const MESES = [
                   </select>
                 </div>
 
-                <!-- Aviso WhatsApp toggle -->
+                <!-- WhatsApp notification — reservado para uso futuro
                 <div class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-sm font-semibold text-gray-700">Avisar no WhatsApp</p>
                       <p class="text-[10px] text-gray-400 mt-0.5">Pronto para automação futura</p>
                     </div>
-                    <!-- Toggle switch -->
                     <button
                       type="button"
                       (click)="form.avisar_whatsapp = !form.avisar_whatsapp"
@@ -323,7 +322,6 @@ const MESES = [
                       ></span>
                     </button>
                   </div>
-
                   @if (form.avisar_whatsapp) {
                     <div class="mt-3">
                       <input
@@ -336,6 +334,7 @@ const MESES = [
                     </div>
                   }
                 </div>
+                -->
 
                 @if (erroForm()) {
                   <p class="text-xs text-red-500 font-semibold">{{ erroForm() }}</p>
