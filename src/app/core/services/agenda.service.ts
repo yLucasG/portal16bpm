@@ -42,7 +42,7 @@ export class AgendaService {
       .eq('usuario_id', usuarioId)
       .gte('data', inicio)
       .lte('data', fim)
-      .order('hora', { ascending: true, nullsFirst: false });
+      .order('hora', { ascending: true });
   }
 
   inserir(evento: NovoEvento) {
