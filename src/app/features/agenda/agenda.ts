@@ -4,18 +4,18 @@ import { AuthService } from '../../core/services/auth.service';
 import { AgendaEvento, AgendaService } from '../../core/services/agenda.service';
 
 // Cores estáticas para Tailwind scanner:
-// bg-blue-500  bg-blue-100  text-blue-700  border-blue-200
-// bg-red-500   bg-red-100   text-red-700   border-red-200
-// bg-green-500 bg-green-100 text-green-700 border-green-200
-// bg-orange-500 bg-orange-100 text-orange-700 border-orange-200
+// bg-blue-500   bg-blue-100   text-blue-700   border-blue-200
+// bg-red-500    bg-red-100    text-red-700    border-red-200
+// bg-violet-500 bg-violet-100 text-violet-700 border-violet-200
+// bg-green-500  bg-green-100  text-green-700  border-green-200
 
 type TagCor = 'blue' | 'red' | 'green' | 'orange';
 
 const TAG: Record<TagCor, { label: string; dot: string; badge: string; border: string }> = {
   blue:   { label: 'Escala',        dot: 'bg-blue-500',   badge: 'bg-blue-100 text-blue-700',     border: 'border-blue-200'   },
   red:    { label: 'Prazo/IPM',     dot: 'bg-red-500',    badge: 'bg-red-100 text-red-700',       border: 'border-red-200'    },
-  green:  { label: 'Rotina',        dot: 'bg-green-500',  badge: 'bg-green-100 text-green-700',   border: 'border-green-200'  },
-  orange: { label: 'Serviço Extra', dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', border: 'border-orange-200' },
+  green:  { label: 'Rotina',        dot: 'bg-violet-500', badge: 'bg-violet-100 text-violet-700', border: 'border-violet-200' },
+  orange: { label: 'Serviço Extra', dot: 'bg-green-500',  badge: 'bg-green-100 text-green-700',   border: 'border-green-200'  },
 };
 
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
