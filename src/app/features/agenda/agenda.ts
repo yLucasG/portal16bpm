@@ -7,13 +7,15 @@ import { AgendaEvento, AgendaService } from '../../core/services/agenda.service'
 // bg-blue-500  bg-blue-100  text-blue-700  border-blue-200
 // bg-red-500   bg-red-100   text-red-700   border-red-200
 // bg-green-500 bg-green-100 text-green-700 border-green-200
+// bg-orange-500 bg-orange-100 text-orange-700 border-orange-200
 
-type TagCor = 'blue' | 'red' | 'green';
+type TagCor = 'blue' | 'red' | 'green' | 'orange';
 
 const TAG: Record<TagCor, { label: string; dot: string; badge: string; border: string }> = {
-  blue:  { label: 'Escala',    dot: 'bg-blue-500',  badge: 'bg-blue-100 text-blue-700',  border: 'border-blue-200'  },
-  red:   { label: 'Prazo/IPM', dot: 'bg-red-500',   badge: 'bg-red-100 text-red-700',    border: 'border-red-200'   },
-  green: { label: 'Rotina',    dot: 'bg-green-500', badge: 'bg-green-100 text-green-700', border: 'border-green-200' },
+  blue:   { label: 'Escala',        dot: 'bg-blue-500',   badge: 'bg-blue-100 text-blue-700',     border: 'border-blue-200'   },
+  red:    { label: 'Prazo/IPM',     dot: 'bg-red-500',    badge: 'bg-red-100 text-red-700',       border: 'border-red-200'    },
+  green:  { label: 'Rotina',        dot: 'bg-green-500',  badge: 'bg-green-100 text-green-700',   border: 'border-green-200'  },
+  orange: { label: 'Serviço Extra', dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', border: 'border-orange-200' },
 };
 
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -300,8 +302,36 @@ const MESES = [
                     <option value="blue">Escala</option>
                     <option value="red">Prazo / IPM</option>
                     <option value="green">Rotina</option>
+                    <option value="orange">Serviço Extra</option>
                   </select>
                 </div>
+
+                <!-- Valor serviço extra -->
+                @if (form.tag_cor === 'orange') {
+                  <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                      Valor do serviço *
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <button type="button"
+                              (click)="form.valor_extra = 180"
+                              class="py-3 rounded-xl border-2 font-bold text-sm transition-all active:scale-95"
+                              [class]="form.valor_extra === 180
+                                ? 'border-orange-400 bg-orange-50 text-orange-700'
+                                : 'border-gray-200 bg-white text-gray-500'">
+                        R$ 180,00
+                      </button>
+                      <button type="button"
+                              (click)="form.valor_extra = 300"
+                              class="py-3 rounded-xl border-2 font-bold text-sm transition-all active:scale-95"
+                              [class]="form.valor_extra === 300
+                                ? 'border-orange-400 bg-orange-50 text-orange-700'
+                                : 'border-gray-200 bg-white text-gray-500'">
+                        R$ 300,00
+                      </button>
+                    </div>
+                  </div>
+                }
 
                 <!-- WhatsApp notification — reservado para uso futuro
                 <div class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
@@ -395,6 +425,7 @@ export class Agenda implements OnInit {
     hora: '',
     hora_fim: '',
     tag_cor: 'blue' as TagCor,
+    valor_extra: null as number | null,
     avisar_whatsapp: false,
     telefone_whatsapp: '',
   };
@@ -491,7 +522,7 @@ export class Agenda implements OnInit {
   }
 
   private resetForm(): void {
-    this.form = { titulo: '', descricao: '', hora: '', hora_fim: '', tag_cor: 'blue', avisar_whatsapp: false, telefone_whatsapp: '' };
+    this.form = { titulo: '', descricao: '', hora: '', hora_fim: '', tag_cor: 'blue', valor_extra: null, avisar_whatsapp: false, telefone_whatsapp: '' };
   }
 
   // ── CRUD ──────────────────────────────────────────────────────
@@ -499,6 +530,12 @@ export class Agenda implements OnInit {
     if (!this.form.titulo.trim()) return;
     this.salvando.set(true);
     this.erroForm.set('');
+
+    if (this.form.tag_cor === 'orange' && !this.form.valor_extra) {
+      this.erroForm.set('Selecione o valor do serviço extra (R$ 180 ou R$ 300).');
+      this.salvando.set(false);
+      return;
+    }
 
     const { error } = await this.agendaService.inserir({
       usuario_id:    this.userId(),
@@ -508,6 +545,7 @@ export class Agenda implements OnInit {
       hora_evento:   this.form.hora || null,
       hora_fim:      this.form.hora_fim.trim() || null,
       tag_cor:       this.form.tag_cor,
+      valor_extra:   this.form.tag_cor === 'orange' ? this.form.valor_extra : null,
       notificar_wpp: this.form.avisar_whatsapp,
       telefone_wpp:  this.form.telefone_whatsapp.trim(),
     });

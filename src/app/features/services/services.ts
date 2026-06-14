@@ -126,6 +126,36 @@ import { SERVICES, ServiceDef } from './services.data';
 
       </div><!-- /space-y-3 ferramentas -->
 
+      <!-- ── PESSOAL ────────────────────────────────── -->
+      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-7 mb-3">
+        Pessoal
+      </p>
+
+      <div class="space-y-3">
+        <a
+          routerLink="/meu-perfil"
+          class="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 active:scale-[0.98] transition-transform"
+        >
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900 text-sm leading-snug">Meu Perfil</p>
+            <p class="text-xs text-gray-400 mt-0.5">Serviços, escalas e rentabilidade extra</p>
+            <div class="flex items-center gap-1 mt-2">
+              <div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+              <span class="text-xs text-indigo-500 font-medium">Histórico do mês</span>
+            </div>
+          </div>
+          <svg class="w-5 h-5 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
       <p class="text-center text-xs text-gray-300 mt-8">
         O progresso do checklist é salvo automaticamente por dia.
       </p>

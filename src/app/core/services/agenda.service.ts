@@ -6,13 +6,15 @@ export interface AgendaEvento {
   usuario_id: string;
   titulo: string;
   descricao: string | null;
-  data_evento: string;       // 'YYYY-MM-DD'
-  hora_evento: string | null; // 'HH:MM'
-  hora_fim: string | null;    // 'HH:MM'
-  tag_cor: 'blue' | 'red' | 'green';
+  data_evento: string;
+  hora_evento: string | null;
+  hora_fim: string | null;
+  tag_cor: 'blue' | 'red' | 'green' | 'orange';
   notificar_wpp: boolean;
   telefone_wpp: string | null;
   criado_em: string;
+  valor_extra: number | null;
+  ocorrencia_mike: string | null;
 }
 
 export interface NovoEvento {
@@ -22,9 +24,10 @@ export interface NovoEvento {
   data_evento: string;
   hora_evento: string | null;
   hora_fim: string | null;
-  tag_cor: 'blue' | 'red' | 'green';
+  tag_cor: 'blue' | 'red' | 'green' | 'orange';
   notificar_wpp: boolean;
   telefone_wpp: string;
+  valor_extra?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -47,6 +50,10 @@ export class AgendaService {
 
   inserir(evento: NovoEvento) {
     return this.db.from('agenda').insert(evento).select().single();
+  }
+
+  atualizarOcorrencia(id: string, mike: string) {
+    return this.db.from('agenda').update({ ocorrencia_mike: mike }).eq('id', id);
   }
 
   excluir(id: string) {

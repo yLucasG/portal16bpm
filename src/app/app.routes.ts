@@ -43,6 +43,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'meu-perfil',
+    loadComponent: () =>
+      import('./features/meu-perfil/meu-perfil').then(m => m.MeuPerfil),
+    canActivate: [authGuard],
+  },
+  {
     path: 'escala',
     loadComponent: () =>
       import('./features/escala/escala').then(m => m.Escala),
