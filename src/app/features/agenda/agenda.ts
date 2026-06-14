@@ -262,34 +262,17 @@ const SERVICOS_ESCALA = [
                     {{ form.tag_cor === 'blue' ? 'Serviço *' : 'Título *' }}
                   </label>
                   @if (form.tag_cor === 'blue') {
-                    <div class="space-y-1.5">
+                    <select
+                      [(ngModel)]="form.titulo"
+                      name="titulo_servico"
+                      class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                    >
+                      <option value="" disabled>Selecione o serviço...</option>
                       @for (s of servicosEscala; track s) {
-                        <button type="button"
-                                (click)="form.titulo = s"
-                                class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.98]"
-                                [class]="form.titulo === s ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 bg-white'">
-                          <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                               [class]="form.titulo === s ? 'border-indigo-500' : 'border-gray-300'">
-                            @if (form.titulo === s) {
-                              <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                            }
-                          </div>
-                          <span class="text-sm" [class]="form.titulo === s ? 'font-bold text-indigo-700' : 'font-medium text-gray-700'">{{ s }}</span>
-                        </button>
+                        <option [value]="s">{{ s }}</option>
                       }
-                      <button type="button"
-                              (click)="form.titulo = '__outros__'"
-                              class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.98]"
-                              [class]="form.titulo === '__outros__' ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 bg-white'">
-                        <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                             [class]="form.titulo === '__outros__' ? 'border-indigo-500' : 'border-gray-300'">
-                          @if (form.titulo === '__outros__') {
-                            <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                          }
-                        </div>
-                        <span class="text-sm" [class]="form.titulo === '__outros__' ? 'font-bold text-indigo-700' : 'font-medium text-gray-700'">Outros</span>
-                      </button>
-                    </div>
+                      <option value="__outros__">Outros</option>
+                    </select>
                     @if (form.titulo === '__outros__') {
                       <input
                         type="text"
