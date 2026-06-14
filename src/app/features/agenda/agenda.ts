@@ -25,6 +25,18 @@ const MESES = [
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
 ];
 
+const SERVICOS_ESCALA = [
+  'Fiscal de POG manhã',
+  'Fiscal de POG tarde',
+  'Monitoramento',
+  'Operações dia',
+  'Operações noite',
+  'Combate ao MVI',
+  'Fecha batalhão',
+  'Impacto Integrado',
+  'Expediente',
+] as const;
+
 @Component({
   selector: 'app-agenda',
   imports: [FormsModule],
@@ -244,17 +256,60 @@ const MESES = [
             <div class="overflow-y-auto flex-1 px-5 pb-6">
               <div class="space-y-3">
 
-                <!-- Título -->
+                <!-- Título / Seletor de serviço -->
                 <div>
-                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Título *</label>
-                  <input
-                    type="text"
-                    [(ngModel)]="form.titulo"
-                    name="titulo"
-                    placeholder="Ex: IPM nº 123 — prazo final"
-                    maxlength="120"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent placeholder:text-gray-300"
-                  />
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    {{ form.tag_cor === 'blue' ? 'Serviço *' : 'Título *' }}
+                  </label>
+                  @if (form.tag_cor === 'blue') {
+                    <div class="space-y-1.5">
+                      @for (s of servicosEscala; track s) {
+                        <button type="button"
+                                (click)="form.titulo = s"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.98]"
+                                [class]="form.titulo === s ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 bg-white'">
+                          <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                               [class]="form.titulo === s ? 'border-indigo-500' : 'border-gray-300'">
+                            @if (form.titulo === s) {
+                              <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                            }
+                          </div>
+                          <span class="text-sm" [class]="form.titulo === s ? 'font-bold text-indigo-700' : 'font-medium text-gray-700'">{{ s }}</span>
+                        </button>
+                      }
+                      <button type="button"
+                              (click)="form.titulo = '__outros__'"
+                              class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 text-left transition-all active:scale-[0.98]"
+                              [class]="form.titulo === '__outros__' ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 bg-white'">
+                        <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                             [class]="form.titulo === '__outros__' ? 'border-indigo-500' : 'border-gray-300'">
+                          @if (form.titulo === '__outros__') {
+                            <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                          }
+                        </div>
+                        <span class="text-sm" [class]="form.titulo === '__outros__' ? 'font-bold text-indigo-700' : 'font-medium text-gray-700'">Outros</span>
+                      </button>
+                    </div>
+                    @if (form.titulo === '__outros__') {
+                      <input
+                        type="text"
+                        [(ngModel)]="form.tituloCustom"
+                        name="tituloCustom"
+                        placeholder="Descreva o serviço..."
+                        maxlength="120"
+                        class="mt-2 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent placeholder:text-gray-300"
+                      />
+                    }
+                  } @else {
+                    <input
+                      type="text"
+                      [(ngModel)]="form.titulo"
+                      name="titulo"
+                      placeholder="Ex: IPM nº 123 — prazo final"
+                      maxlength="120"
+                      class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent placeholder:text-gray-300"
+                    />
+                  }
                 </div>
 
                 <!-- Descrição -->
@@ -296,6 +351,7 @@ const MESES = [
                   <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Categoria</label>
                   <select
                     [(ngModel)]="form.tag_cor"
+                    (change)="onCategoriaChange()"
                     name="tag_cor"
                     class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                   >
@@ -373,7 +429,7 @@ const MESES = [
                 <!-- Botão salvar -->
                 <button
                   (click)="salvar()"
-                  [disabled]="salvando() || !form.titulo.trim()"
+                  [disabled]="salvando() || !tituloValido()"
                   class="w-full py-3.5 bg-indigo-600 text-white rounded-2xl text-sm font-bold active:bg-indigo-700 disabled:opacity-40 transition-all flex items-center justify-center gap-2"
                 >
                   @if (salvando()) {
@@ -419,8 +475,11 @@ export class Agenda implements OnInit {
   readonly salvando       = signal(false);
   readonly erroForm       = signal('');
 
+  readonly servicosEscala = SERVICOS_ESCALA;
+
   form = {
     titulo: '',
+    tituloCustom: '',
     descricao: '',
     hora: '',
     hora_fim: '',
@@ -522,12 +581,12 @@ export class Agenda implements OnInit {
   }
 
   private resetForm(): void {
-    this.form = { titulo: '', descricao: '', hora: '', hora_fim: '', tag_cor: 'blue', valor_extra: null, avisar_whatsapp: false, telefone_whatsapp: '' };
+    this.form = { titulo: '', tituloCustom: '', descricao: '', hora: '', hora_fim: '', tag_cor: 'blue', valor_extra: null, avisar_whatsapp: false, telefone_whatsapp: '' };
   }
 
   // ── CRUD ──────────────────────────────────────────────────────
   async salvar(): Promise<void> {
-    if (!this.form.titulo.trim()) return;
+    if (!this.tituloValido()) return;
     this.salvando.set(true);
     this.erroForm.set('');
 
@@ -539,7 +598,7 @@ export class Agenda implements OnInit {
 
     const { error } = await this.agendaService.inserir({
       usuario_id:    this.userId(),
-      titulo:        this.form.titulo.trim(),
+      titulo:        this.form.titulo === '__outros__' ? this.form.tituloCustom.trim() : this.form.titulo,
       descricao:     this.form.descricao.trim(),
       data_evento:   this.diaKey(this.diaSelecionado()!),
       hora_evento:   this.form.hora || null,
@@ -578,6 +637,21 @@ export class Agenda implements OnInit {
 
   tag(cor: string) {
     return TAG[(cor as TagCor)] ?? TAG['blue'];
+  }
+
+  tituloValido(): boolean {
+    if (this.form.tag_cor === 'blue') {
+      if (!this.form.titulo) return false;
+      if (this.form.titulo === '__outros__') return !!this.form.tituloCustom.trim();
+      return true;
+    }
+    return !!this.form.titulo.trim();
+  }
+
+  onCategoriaChange(): void {
+    this.form.titulo = '';
+    this.form.tituloCustom = '';
+    if (this.form.tag_cor !== 'orange') this.form.valor_extra = null;
   }
 
   getCelulaClasse(dia: number): string {
